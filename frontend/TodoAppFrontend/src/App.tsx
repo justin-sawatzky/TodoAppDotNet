@@ -27,6 +27,7 @@ function App() {
         } else {
           // User doesn't exist in backend, clear localStorage
           console.log('Cached user no longer exists in backend, clearing cache');
+          console.log('Error details:', error); // Debug log
           localStorage.removeItem('currentUser');
         }
       } catch (error) {

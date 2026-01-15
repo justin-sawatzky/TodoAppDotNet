@@ -14,7 +14,7 @@ export function Login({ onLogin }: LoginProps) {
   const [username, setUsername] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { error, handleApiCall, clearError } = useApiError();
+  const { error, handleApiCall, handleError, clearError } = useApiError();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,14 +51,10 @@ export function Login({ onLogin }: LoginProps) {
       if (user) {
         onLogin(user as User);
       } else {
-        // Create a custom "not found" error for better UX
-        await handleApiCall(
-          () => Promise.reject({ 
-            response: { status: 404 }, 
-            data: { message: 'User not found. Please create a new account or check your email address.' }
-          }),
-          'find user'
-        );
+        // User not found - create a helpful error message
+        handleError({
+          message: `No account found with email ${email}. Please create a new account or check your email address.`
+        }, 'find user');
       }
     }
     

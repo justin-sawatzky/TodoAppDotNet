@@ -23,113 +23,37 @@ export function parseApiError(error: any): ParsedError {
     };
   }
 
-  // Check if this is a simple error object with just a message
-  if (error.message && !error.response && !error.error && !error.status) {
-    // This appears to be the actual format we're getting
+  // openapi-fetch returns errors in the format: { message: "..." }
+  // Just extract the message and pass it through to the user
+  if (error.message) {
     const message = error.message;
     
-    // Check if it's a validation error based on the message content
+    // Determine error type based on HTTP status or message content for styling purposes
+    let type: ParsedError['type'] = 'server';
+    
     if (message.includes('Validation failed:')) {
-      return {
-        type: 'validation',
-        message: message,
-        validationErrors: parseValidationMessage(message)
-      };
+      type = 'validation';
+    } else if (message.toLowerCase().includes('not found')) {
+      type = 'not_found';
+    } else if (message.toLowerCase().includes('already exists') || message.toLowerCase().includes('conflict')) {
+      type = 'conflict';
+    } else if (message.toLowerCase().includes('network')) {
+      type = 'network';
     }
     
-    // Check for other error types based on message content
-    if (message.toLowerCase().includes('not found')) {
-      return {
-        type: 'not_found',
-        message: message
-      };
-    }
-    
-    if (message.toLowerCase().includes('already exists') || message.toLowerCase().includes('conflict')) {
-      return {
-        type: 'conflict',
-        message: message
-      };
-    }
-    
-    // Default to server error for unknown message-only errors
     return {
-      type: 'server',
-      message: message
+      type,
+      message,
+      // Only parse validation errors for better display
+      validationErrors: type === 'validation' ? parseValidationMessage(message) : undefined
     };
   }
 
-  // openapi-fetch returns errors in the format: { error: {...}, response: Response }
-  let status: number | undefined;
-  let responseData: any;
-
-  if (error.response && error.error) {
-    // openapi-fetch format: { error: { message: "..." }, response: Response }
-    status = error.response.status;
-    responseData = error.error;
-  } else if (error.error && error.error.status) {
-    // Alternative format: { error: { status: 400, data: {...} } }
-    status = error.error.status;
-    responseData = error.error.data;
-  } else if (error.status) {
-    // Direct format: { status: 400, data: {...} }
-    status = error.status;
-    responseData = error.data;
-  } else if (error.response) {
-    // Format: { response: { status: 400, data: {...} } }
-    status = error.response.status;
-    responseData = error.response.data;
-  } else {
-    // Unknown error format, treat as network error
-    return {
-      type: 'network',
-      message: 'Network error. Please check your connection and try again.'
-    };
-  }
-
-  if (!status) {
-    return {
-      type: 'network',
-      message: 'Network error. Please check your connection and try again.'
-    };
-  }
-
-  switch (status) {
-    case 400:
-      // Validation error
-      const validationMessage = responseData?.message || responseData?.Message || 'Validation failed';
-      return {
-        type: 'validation',
-        message: validationMessage,
-        validationErrors: parseValidationMessage(validationMessage)
-      };
-
-    case 404:
-      return {
-        type: 'not_found',
-        message: responseData?.message || responseData?.Message || 'Resource not found'
-      };
-
-    case 409:
-      return {
-        type: 'conflict',
-        message: responseData?.message || responseData?.Message || 'Resource already exists'
-      };
-
-    case 500:
-    case 502:
-    case 503:
-      return {
-        type: 'server',
-        message: 'Server error. Please try again later.'
-      };
-
-    default:
-      return {
-        type: 'server',
-        message: responseData?.message || responseData?.Message || 'An unexpected error occurred'
-      };
-  }
+  // Fallback for unknown error formats
+  return {
+    type: 'server',
+    message: 'An unexpected error occurred. Please try again.'
+  };
 }
 
 /**
