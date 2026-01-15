@@ -1,4 +1,12 @@
 $version: "2"
+
+metadata suppressions = [
+    {
+        id: "MemberShouldReferenceResource",
+        namespace: "example.todoapp.resources"
+    }
+]
+
 namespace example.todoapp
 
 use aws.protocols#restJson1
