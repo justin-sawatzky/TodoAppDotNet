@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: todoapp-backend
+    ports:
+      - "5247:5247"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - UseInMemoryDatabase=true
+      - DebugSaveToDisk=false
+      - ASPNETCORE_URLS=http://+:5247
+    networks:
+      - todoapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "dotnet --info > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend/TodoAppFrontend
+      dockerfile: Dockerfile
+    container_name: todoapp-frontend
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://localhost:5247
+    depends_on:
+      - backend
+    networks:
+      - todoapp-network
+
+networks:
+  todoapp-network:
+    driver: bridge

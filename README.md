@@ -43,11 +43,40 @@ A full-stack Todo application with a .NET backend and React TypeScript frontend,
 
 ### Prerequisites
 
-- .NET 10 SDK
-- Node.js 18+
-- SQLite (included with .NET)
+- .NET 10 SDK (for local development)
+- Node.js 18+ (for local development)
+- Docker (for containerized deployment)
 
-### Quick Start
+### Quick Start with Docker 🐳 (Recommended)
+
+**Option 1: Docker Compose (Multi-container)**
+```bash
+# Start both frontend and backend
+docker-compose up --build
+
+# Access the app
+# Frontend: http://localhost:80
+# Backend API: http://localhost:5247
+```
+
+**Option 2: Combined Container (Single container)**
+```bash
+# Build and run combined container
+docker build -t todoapp .
+docker run -p 80:80 -p 5247:5247 todoapp
+
+# Access at http://localhost:80
+```
+
+**Option 3: Using Makefile**
+```bash
+make help          # Show all available commands
+make run           # Start with docker-compose
+make logs          # View logs
+make stop          # Stop containers
+```
+
+### Local Development (Without Docker)
 
 **Option 1: Two Terminals (Recommended)**
 
@@ -72,7 +101,35 @@ npm run dev
 
 Then open http://localhost:5173 in your browser!
 
-### First Time Setup
+## Deployment Options
+
+### 🐳 Docker (Recommended for Production)
+
+**Multi-container with Docker Compose:**
+```bash
+docker-compose up -d --build
+```
+
+**Single combined container:**
+```bash
+docker build -t todoapp .
+docker run -d -p 80:80 -p 5247:5247 todoapp
+```
+
+**Individual containers:**
+```bash
+# Backend
+docker build -t todoapp-backend ./backend
+docker run -d -p 5247:5247 todoapp-backend
+
+# Frontend
+docker build -t todoapp-frontend ./frontend/TodoAppFrontend
+docker run -d -p 80:80 todoapp-frontend
+```
+
+See [DOCKER_SETUP.md](DOCKER_SETUP.md) for detailed Docker documentation.
+
+### 📦 Local Development Setup
 
 1. **Backend Setup:**
 ```bash
