@@ -116,7 +116,9 @@ export interface components {
         };
         /** @description TodoList structures */
         CreateTodoListRequestContent: {
+            /** @description List name with validation constraints */
             name: string;
+            /** @description List description with validation constraints */
             description?: string;
         };
         CreateTodoListResponseContent: {
@@ -124,7 +126,9 @@ export interface components {
             userId: string;
             /** @description Identifiers */
             listId: string;
+            /** @description List name with validation constraints */
             name: string;
+            /** @description List description with validation constraints */
             description?: string;
             /** Format: double */
             createdAt: number;
@@ -133,9 +137,11 @@ export interface components {
         };
         /** @description TodoTask structures */
         CreateTodoTaskRequestContent: {
+            /** @description Task description with validation constraints */
             description: string;
             /** @default false */
             completed: boolean;
+            /** @description Task order with validation constraints */
             order?: number;
         };
         CreateTodoTaskResponseContent: {
@@ -144,8 +150,10 @@ export interface components {
             /** @description Identifiers */
             listId: string;
             taskId: string;
+            /** @description Task description with validation constraints */
             description: string;
             completed: boolean;
+            /** @description Task order with validation constraints */
             order?: number;
             /** Format: double */
             createdAt: number;
@@ -154,14 +162,18 @@ export interface components {
         };
         /** @description Structure for creating a new user */
         CreateUserRequestContent: {
+            /** @description Username with validation constraints */
             username: string;
+            /** @description Email with validation constraints */
             email: string;
         };
         /** @description Structure for user response */
         CreateUserResponseContent: {
             /** @description User identifier */
             userId: string;
+            /** @description Username with validation constraints */
             username: string;
+            /** @description Email with validation constraints */
             email: string;
             /** Format: double */
             createdAt: number;
@@ -171,7 +183,9 @@ export interface components {
             userId: string;
             /** @description Identifiers */
             listId: string;
+            /** @description List name with validation constraints */
             name: string;
+            /** @description List description with validation constraints */
             description?: string;
             /** Format: double */
             createdAt: number;
@@ -184,8 +198,10 @@ export interface components {
             /** @description Identifiers */
             listId: string;
             taskId: string;
+            /** @description Task description with validation constraints */
             description: string;
             completed: boolean;
+            /** @description Task order with validation constraints */
             order?: number;
             /** Format: double */
             createdAt: number;
@@ -196,21 +212,26 @@ export interface components {
         GetUserResponseContent: {
             /** @description User identifier */
             userId: string;
+            /** @description Username with validation constraints */
             username: string;
+            /** @description Email with validation constraints */
             email: string;
             /** Format: double */
             createdAt: number;
         };
         ListTodoListsResponseContent: {
             lists: components["schemas"]["TodoListOutput"][];
+            /** @description Pagination token constraint */
             nextToken?: string;
         };
         ListTodoTasksResponseContent: {
             tasks: components["schemas"]["TodoTaskOutput"][];
+            /** @description Pagination token constraint */
             nextToken?: string;
         };
         ListUsersResponseContent: {
             users: components["schemas"]["UserOutput"][];
+            /** @description Pagination token constraint */
             nextToken?: string;
         };
         ResourceNotFoundExceptionResponseContent: {
@@ -221,7 +242,9 @@ export interface components {
             userId: string;
             /** @description Identifiers */
             listId: string;
+            /** @description List name with validation constraints */
             name: string;
+            /** @description List description with validation constraints */
             description?: string;
             /** Format: double */
             createdAt: number;
@@ -234,8 +257,10 @@ export interface components {
             /** @description Identifiers */
             listId: string;
             taskId: string;
+            /** @description Task description with validation constraints */
             description: string;
             completed: boolean;
+            /** @description Task order with validation constraints */
             order?: number;
             /** Format: double */
             createdAt: number;
@@ -243,7 +268,9 @@ export interface components {
             updatedAt: number;
         };
         UpdateTodoListRequestContent: {
+            /** @description List name with validation constraints */
             name?: string;
+            /** @description List description with validation constraints */
             description?: string;
         };
         UpdateTodoListResponseContent: {
@@ -251,7 +278,9 @@ export interface components {
             userId: string;
             /** @description Identifiers */
             listId: string;
+            /** @description List name with validation constraints */
             name: string;
+            /** @description List description with validation constraints */
             description?: string;
             /** Format: double */
             createdAt: number;
@@ -259,8 +288,10 @@ export interface components {
             updatedAt: number;
         };
         UpdateTodoTaskRequestContent: {
+            /** @description Task description with validation constraints */
             description?: string;
             completed?: boolean;
+            /** @description Task order with validation constraints */
             order?: number;
         };
         UpdateTodoTaskResponseContent: {
@@ -269,8 +300,10 @@ export interface components {
             /** @description Identifiers */
             listId: string;
             taskId: string;
+            /** @description Task description with validation constraints */
             description: string;
             completed: boolean;
+            /** @description Task order with validation constraints */
             order?: number;
             /** Format: double */
             createdAt: number;
@@ -279,14 +312,18 @@ export interface components {
         };
         /** @description Structure for updating a user */
         UpdateUserRequestContent: {
+            /** @description Username with validation constraints */
             username?: string;
+            /** @description Email with validation constraints */
             email?: string;
         };
         /** @description Structure for user response */
         UpdateUserResponseContent: {
             /** @description User identifier */
             userId: string;
+            /** @description Username with validation constraints */
             username: string;
+            /** @description Email with validation constraints */
             email: string;
             /** Format: double */
             createdAt: number;
@@ -295,7 +332,9 @@ export interface components {
         UserOutput: {
             /** @description User identifier */
             userId: string;
+            /** @description Username with validation constraints */
             username: string;
+            /** @description Email with validation constraints */
             email: string;
             /** Format: double */
             createdAt: number;
@@ -316,7 +355,9 @@ export interface operations {
     ListUsers: {
         parameters: {
             query?: {
+                /** @description Pagination max results constraint */
                 maxResults?: number;
+                /** @description Pagination token constraint */
                 nextToken?: string;
             };
             header?: never;
@@ -506,7 +547,9 @@ export interface operations {
     ListTodoLists: {
         parameters: {
             query?: {
+                /** @description Pagination max results constraint */
                 maxResults?: number;
+                /** @description Pagination token constraint */
                 nextToken?: string;
             };
             header?: never;
@@ -708,7 +751,9 @@ export interface operations {
     ListTodoTasks: {
         parameters: {
             query?: {
+                /** @description Pagination max results constraint */
                 maxResults?: number;
+                /** @description Pagination token constraint */
                 nextToken?: string;
                 completed?: boolean;
             };

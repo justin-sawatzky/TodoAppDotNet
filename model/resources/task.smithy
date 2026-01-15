@@ -8,8 +8,8 @@ resource TodoList {
         listId: ListId 
     }
     properties: {
-        name: String,
-        description: String,
+        name: ListName,
+        description: ListDescription,
         createdAt: Timestamp,
         updatedAt: Timestamp
     }
@@ -28,9 +28,9 @@ resource TodoTask {
         taskId: TaskId 
     }
     properties: {
-        description: String,
+        description: TaskDescription,
         completed: Boolean,
-        order: Integer,
+        order: TaskOrder,
         createdAt: Timestamp,
         updatedAt: Timestamp
     }
@@ -45,6 +45,22 @@ resource TodoTask {
 string ListId
 string TaskId
 
+/// List name with validation constraints
+@length(min: 1, max: 100)
+string ListName
+
+/// List description with validation constraints
+@length(min: 0, max: 500)
+string ListDescription
+
+/// Task description with validation constraints
+@length(min: 1, max: 1000)
+string TaskDescription
+
+/// Task order with validation constraints
+@range(min: 0, max: 999999)
+integer TaskOrder
+
 /// TodoList structures
 structure CreateTodoListInput {
     @required
@@ -52,9 +68,9 @@ structure CreateTodoListInput {
     userId: UserId,
     
     @required
-    name: String,
+    name: ListName,
     
-    description: String
+    description: ListDescription
 }
 
 structure UpdateTodoListInput {
@@ -66,8 +82,8 @@ structure UpdateTodoListInput {
     @httpLabel
     listId: ListId,
     
-    name: String,
-    description: String
+    name: ListName,
+    description: ListDescription
 }
 
 structure TodoListOutput {
@@ -78,9 +94,9 @@ structure TodoListOutput {
     listId: ListId,
     
     @required
-    name: String,
+    name: ListName,
     
-    description: String,
+    description: ListDescription,
     
     @required
     createdAt: Timestamp,
@@ -100,11 +116,11 @@ structure CreateTodoTaskInput {
     listId: ListId,
     
     @required
-    description: String,
+    description: TaskDescription,
     
     completed: Boolean = false,
     
-    order: Integer
+    order: TaskOrder
 }
 
 structure UpdateTodoTaskInput {
@@ -120,9 +136,9 @@ structure UpdateTodoTaskInput {
     @httpLabel
     taskId: TaskId,
     
-    description: String,
+    description: TaskDescription,
     completed: Boolean,
-    order: Integer
+    order: TaskOrder
 }
 
 structure TodoTaskOutput {
@@ -136,12 +152,12 @@ structure TodoTaskOutput {
     taskId: TaskId,
     
     @required
-    description: String,
+    description: TaskDescription,
     
     @required
     completed: Boolean,
     
-    order: Integer,
+    order: TaskOrder,
     
     @required
     createdAt: Timestamp,
@@ -215,17 +231,17 @@ structure ListTodoListsInput {
     userId: UserId,
     
     @httpQuery("maxResults")
-    maxResults: Integer,
+    maxResults: MaxResults,
     
     @httpQuery("nextToken")
-    nextToken: String
+    nextToken: NextToken
 }
 
 structure ListTodoListsOutput {
     @required
     lists: TodoListList,
     
-    nextToken: String
+    nextToken: NextToken
 }
 
 list TodoListList {
@@ -309,10 +325,10 @@ structure ListTodoTasksInput {
     listId: ListId,
     
     @httpQuery("maxResults")
-    maxResults: Integer,
+    maxResults: MaxResults,
     
     @httpQuery("nextToken")
-    nextToken: String,
+    nextToken: NextToken,
     
     @httpQuery("completed")
     completed: Boolean
@@ -322,7 +338,7 @@ structure ListTodoTasksOutput {
     @required
     tasks: TodoTaskList,
     
-    nextToken: String
+    nextToken: NextToken
 }
 
 list TodoTaskList {

@@ -5,8 +5,8 @@ namespace example.todoapp.resources
 resource User {
     identifiers: { userId: UserId }
     properties: { 
-        username: String,
-        email: String,
+        username: Username,
+        email: Email,
         createdAt: Timestamp
     }
     create: CreateUser,
@@ -19,13 +19,31 @@ resource User {
 /// User identifier
 string UserId
 
+/// Username with validation constraints
+@length(min: 3, max: 50)
+@pattern("^[a-zA-Z0-9_-]+$")
+string Username
+
+/// Email with validation constraints
+@length(min: 5, max: 254)
+@pattern("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+string Email
+
+/// Pagination max results constraint
+@range(min: 1, max: 100)
+integer MaxResults
+
+/// Pagination token constraint
+@length(min: 1, max: 1000)
+string NextToken
+
 /// Structure for creating a new user
 structure CreateUserInput {
     @required
-    username: String,
+    username: Username,
     
     @required
-    email: String
+    email: Email
 }
 
 /// Structure for updating a user
@@ -34,8 +52,8 @@ structure UpdateUserInput {
     @httpLabel
     userId: UserId,
     
-    username: String,
-    email: String
+    username: Username,
+    email: Email
 }
 
 /// Structure for user response
@@ -44,10 +62,10 @@ structure UserOutput {
     userId: UserId,
     
     @required
-    username: String,
+    username: Username,
     
     @required
-    email: String,
+    email: Email,
     
     @required
     createdAt: Timestamp
@@ -110,17 +128,17 @@ operation ListUsers {
 
 structure ListUsersInput {
     @httpQuery("maxResults")
-    maxResults: Integer,
+    maxResults: MaxResults,
     
     @httpQuery("nextToken")
-    nextToken: String
+    nextToken: NextToken
 }
 
 structure ListUsersOutput {
     @required
     users: UserList,
     
-    nextToken: String
+    nextToken: NextToken
 }
 
 list UserList {
