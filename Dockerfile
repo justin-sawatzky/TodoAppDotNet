@@ -3,13 +3,13 @@ FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/TodoAppFrontend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 COPY frontend/TodoAppFrontend/ ./
 RUN npm run build
 
 # Backend build stage
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS backend-build
 
 WORKDIR /app/backend
 COPY backend/TodoAppDotNet.csproj ./
@@ -19,10 +19,10 @@ COPY backend/ ./
 RUN dotnet publish "TodoAppDotNet.csproj" -c Release -o /app/backend/publish /p:UseAppHost=false
 
 # Final stage - nginx serving frontend with backend
-FROM nginx:alpine AS final
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
 
-# Install .NET runtime for backend
-RUN apk add --no-cache dotnet10-runtime
+# Install nginx
+RUN apk add --no-cache nginx
 
 # Copy frontend build
 COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
@@ -31,7 +31,7 @@ COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
 COPY --from=backend-build /app/backend/publish /app/backend
 
 # Copy nginx configuration
-COPY nginx-combined.conf /etc/nginx/conf.d/default.conf
+COPY nginx-alpine.conf /etc/nginx/nginx.conf
 
 # Copy startup script
 COPY start-combined.sh /start-combined.sh

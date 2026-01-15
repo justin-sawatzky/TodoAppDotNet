@@ -126,10 +126,14 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseCors("AllowAll");
 }
 
-app.UseHttpsRedirection();
+// Enable CORS for all environments (needed for Docker deployment)
+app.UseCors("AllowAll");
+
+// Don't redirect to HTTPS in Docker container
+// app.UseHttpsRedirection();
+
 app.MapControllers();
 
 app.Run();

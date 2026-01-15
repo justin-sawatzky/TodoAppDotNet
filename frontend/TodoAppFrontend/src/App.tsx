@@ -1,19 +1,42 @@
 import { useState, useEffect } from 'react';
 import { Login } from './components/Login';
 import { TodoListView } from './components/TodoListView';
+import { api } from './api/client';
 import type { User } from './types';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [isValidatingUser, setIsValidatingUser] = useState(true);
 
   useEffect(() => {
-    // Check for stored user in localStorage
+    validateStoredUser();
+  }, []);
+
+  const validateStoredUser = async () => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser) as User;
+        // Validate that the user still exists in the backend
+        const { data, error } = await api.users.get(parsedUser.userId);
+        
+        if (data && !error) {
+          // User exists in backend, use it
+          setUser(parsedUser);
+        } else {
+          // User doesn't exist in backend, clear localStorage
+          console.log('Cached user no longer exists in backend, clearing cache');
+          localStorage.removeItem('currentUser');
+        }
+      } catch (error) {
+        console.error('Error validating stored user:', error);
+        // Clear invalid data from localStorage
+        localStorage.removeItem('currentUser');
+      }
     }
-  }, []);
+    setIsValidatingUser(false);
+  };
 
   const handleLogin = (loggedInUser: User) => {
     setUser(loggedInUser);
@@ -25,12 +48,29 @@ function App() {
     localStorage.removeItem('currentUser');
   };
 
+  const handleUserInvalidated = () => {
+    // Called when API calls fail due to invalid user
+    console.log('User invalidated, logging out');
+    handleLogout();
+  };
+
+  // Show loading spinner while validating user
+  if (isValidatingUser) {
+    return (
+      <div className="app">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <div>Validating user...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       {!user ? (
         <Login onLogin={handleLogin} />
       ) : (
-        <TodoListView user={user} onLogout={handleLogout} />
+        <TodoListView user={user} onLogout={handleLogout} onUserInvalidated={handleUserInvalidated} />
       )}
     </div>
   );

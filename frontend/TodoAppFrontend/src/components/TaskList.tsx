@@ -8,9 +8,10 @@ interface TaskListProps {
   list: TodoList;
   tasks: TodoTask[];
   onTaskUpdate: () => void;
+  onApiError: (error: any, operation: string) => void;
 }
 
-export function TaskList({ user, list, tasks, onTaskUpdate }: TaskListProps) {
+export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskListProps) {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingDescription, setEditingDescription] = useState('');
@@ -26,20 +27,36 @@ export function TaskList({ user, list, tasks, onTaskUpdate }: TaskListProps) {
     e.preventDefault();
     if (!newTaskDescription.trim()) return;
 
-    await api.tasks.create(user.userId, list.listId, newTaskDescription);
-    setNewTaskDescription('');
-    onTaskUpdate();
+    try {
+      const { error } = await api.tasks.create(user.userId, list.listId, newTaskDescription);
+      if (error) {
+        onApiError(error, 'create task');
+        return;
+      }
+      setNewTaskDescription('');
+      onTaskUpdate();
+    } catch (error) {
+      onApiError(error, 'create task');
+    }
   };
 
   const handleToggleComplete = async (task: TodoTask) => {
-    await api.tasks.update(
-      user.userId,
-      list.listId,
-      task.taskId,
-      undefined,
-      !task.completed
-    );
-    onTaskUpdate();
+    try {
+      const { error } = await api.tasks.update(
+        user.userId,
+        list.listId,
+        task.taskId,
+        undefined,
+        !task.completed
+      );
+      if (error) {
+        onApiError(error, 'update task');
+        return;
+      }
+      onTaskUpdate();
+    } catch (error) {
+      onApiError(error, 'update task');
+    }
   };
 
   const handleStartEdit = (task: TodoTask) => {
@@ -50,15 +67,23 @@ export function TaskList({ user, list, tasks, onTaskUpdate }: TaskListProps) {
   const handleSaveEdit = async (taskId: string) => {
     if (!editingDescription.trim()) return;
 
-    await api.tasks.update(
-      user.userId,
-      list.listId,
-      taskId,
-      editingDescription,
-      undefined
-    );
-    setEditingTaskId(null);
-    onTaskUpdate();
+    try {
+      const { error } = await api.tasks.update(
+        user.userId,
+        list.listId,
+        taskId,
+        editingDescription,
+        undefined
+      );
+      if (error) {
+        onApiError(error, 'update task');
+        return;
+      }
+      setEditingTaskId(null);
+      onTaskUpdate();
+    } catch (error) {
+      onApiError(error, 'update task');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -67,8 +92,16 @@ export function TaskList({ user, list, tasks, onTaskUpdate }: TaskListProps) {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    await api.tasks.delete(user.userId, list.listId, taskId);
-    onTaskUpdate();
+    try {
+      const { error } = await api.tasks.delete(user.userId, list.listId, taskId);
+      if (error) {
+        onApiError(error, 'delete task');
+        return;
+      }
+      onTaskUpdate();
+    } catch (error) {
+      onApiError(error, 'delete task');
+    }
   };
 
   const handleDragStart = (taskId: string) => {
@@ -94,21 +127,34 @@ export function TaskList({ user, list, tasks, onTaskUpdate }: TaskListProps) {
   const handleDragEnd = async () => {
     if (!draggedTaskId) return;
     
-    // Update the order of all tasks based on their new positions
-    const updates = orderedTasks.map((task, index) => 
-      api.tasks.update(
-        user.userId,
-        list.listId,
-        task.taskId,
-        undefined,
-        undefined,
-        index
-      )
-    );
-    
-    await Promise.all(updates);
-    setDraggedTaskId(null);
-    onTaskUpdate();
+    try {
+      // Update the order of all tasks based on their new positions
+      const updates = orderedTasks.map((task, index) => 
+        api.tasks.update(
+          user.userId,
+          list.listId,
+          task.taskId,
+          undefined,
+          undefined,
+          index
+        )
+      );
+      
+      const results = await Promise.all(updates);
+      
+      // Check if any of the updates failed
+      const hasError = results.some(result => result.error);
+      if (hasError) {
+        onApiError(results.find(r => r.error)?.error, 'reorder tasks');
+        return;
+      }
+      
+      setDraggedTaskId(null);
+      onTaskUpdate();
+    } catch (error) {
+      onApiError(error, 'reorder tasks');
+      setDraggedTaskId(null);
+    }
   };
 
   return (
