@@ -10,7 +10,7 @@ public class InMemoryUserRepository : IUserRepository
     public Task<(List<User> users, string? nextToken)> GetUsersAsync(int maxResults, string? nextToken, CancellationToken cancellationToken)
     {
         var allUsers = _users.Values.OrderBy(u => u.CreatedAt).ToList();
-        
+
         int startIndex = 0;
         if (!string.IsNullOrEmpty(nextToken) && int.TryParse(nextToken, out var tokenIndex))
         {

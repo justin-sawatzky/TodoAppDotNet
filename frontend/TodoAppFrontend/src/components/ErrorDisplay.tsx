@@ -46,7 +46,7 @@ export function ErrorDisplay({ error, onDismiss, className = '' }: ErrorDisplayP
         <span className="error-icon">{getErrorIcon(error.type)}</span>
         <div className="error-details">
           <div className="error-message">{error.message}</div>
-          
+
           {error.validationErrors && error.validationErrors.length > 0 && (
             <div className="validation-details">
               {error.validationErrors.map((validationError, index) => (
@@ -62,13 +62,9 @@ export function ErrorDisplay({ error, onDismiss, className = '' }: ErrorDisplayP
             </div>
           )}
         </div>
-        
+
         {onDismiss && (
-          <button 
-            className="error-dismiss" 
-            onClick={onDismiss}
-            aria-label="Dismiss error"
-          >
+          <button className="error-dismiss" onClick={onDismiss} aria-label="Dismiss error">
             ×
           </button>
         )}

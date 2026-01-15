@@ -16,8 +16,8 @@ public class UserService : IUserService
     public async Task<ListUsersResponse> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken)
     {
         var (users, nextPageToken) = await _userRepository.GetUsersAsync(
-            (int?)maxResults ?? 50, 
-            nextToken, 
+            (int?)maxResults ?? 50,
+            nextToken,
             cancellationToken);
 
         return new ListUsersResponse
@@ -31,15 +31,21 @@ public class UserService : IUserService
     {
         // Validation
         if (string.IsNullOrWhiteSpace(request.Username))
+        {
             throw new ArgumentException("Username is required");
-        
+        }
+
         if (string.IsNullOrWhiteSpace(request.Email))
+        {
             throw new ArgumentException("Email is required");
+        }
 
         // Check if user already exists
         var existingUser = await _userRepository.GetUserByEmailAsync(request.Email, cancellationToken);
         if (existingUser != null)
+        {
             throw new InvalidOperationException("User with this email already exists");
+        }
 
         // Create new user
         var user = new User
@@ -59,7 +65,9 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
+        {
             throw new KeyNotFoundException($"User with ID {userId} not found");
+        }
 
         return MapToUserResponse(user);
     }
@@ -68,14 +76,20 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
+        {
             throw new KeyNotFoundException($"User with ID {userId} not found");
+        }
 
         // Update fields if provided
         if (!string.IsNullOrWhiteSpace(request.Username))
+        {
             user.Username = request.Username;
-        
+        }
+
         if (!string.IsNullOrWhiteSpace(request.Email))
+        {
             user.Email = request.Email;
+        }
 
         await _userRepository.UpdateUserAsync(user, cancellationToken);
 
@@ -86,7 +100,9 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
+        {
             throw new KeyNotFoundException($"User with ID {userId} not found");
+        }
 
         await _userRepository.DeleteUserAsync(userId, cancellationToken);
     }

@@ -1,10 +1,10 @@
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.DTOs;
-using TodoApp.Models;
 using TodoApp.Generated;
-using System.Linq;
+using TodoApp.Models;
 
 namespace TodoApp.Controllers;
 
@@ -29,7 +29,7 @@ public class TodoListsController : ControllerBase
         var lists = await _context.TodoLists
             .Where(l => l.UserId == userId)
             .ToListAsync();
-        
+
         var orderedLists = lists.OrderBy(l => l.CreatedAt).ToList();
 
         return Ok(new ListTodoListsResponse
@@ -71,7 +71,9 @@ public class TodoListsController : ControllerBase
             .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
 
         if (list == null)
+        {
             return NotFound(new { message = "List not found" });
+        }
 
         return Ok(MapToResponse(list));
     }
@@ -91,13 +93,19 @@ public class TodoListsController : ControllerBase
             .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
 
         if (list == null)
+        {
             return NotFound(new { message = "List not found" });
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Name))
+        {
             list.Name = request.Name;
+        }
 
         if (request.Description != null)
+        {
             list.Description = request.Description;
+        }
 
         list.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -113,7 +121,9 @@ public class TodoListsController : ControllerBase
             .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
 
         if (list == null)
+        {
             return NotFound(new { message = "List not found" });
+        }
 
         _context.TodoLists.Remove(list);
         await _context.SaveChangesAsync();

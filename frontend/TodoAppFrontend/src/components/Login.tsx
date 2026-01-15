@@ -26,38 +26,38 @@ export function Login({ onLogin }: LoginProps) {
         () => api.users.create(email, username),
         'create user'
       );
-      
+
       if (apiError) {
         setLoading(false);
         return;
       }
-      
+
       if (data) {
         onLogin(data as User);
       }
     } else {
       // Find existing user by email
-      const { data, error: apiError } = await handleApiCall(
-        () => api.users.list(),
-        'fetch users'
-      );
-      
+      const { data, error: apiError } = await handleApiCall(() => api.users.list(), 'fetch users');
+
       if (apiError) {
         setLoading(false);
         return;
       }
-      
+
       const user = data?.users?.find((u) => u.email === email);
       if (user) {
         onLogin(user as User);
       } else {
         // User not found - create a helpful error message
-        handleError({
-          message: `No account found with email ${email}. Please create a new account or check your email address.`
-        }, 'find user');
+        handleError(
+          {
+            message: `No account found with email ${email}. Please create a new account or check your email address.`,
+          },
+          'find user'
+        );
       }
     }
-    
+
     setLoading(false);
   };
 
@@ -103,11 +103,7 @@ export function Login({ onLogin }: LoginProps) {
             {loading ? 'Loading...' : isNewUser ? 'Create Account' : 'Login'}
           </button>
 
-          <button
-            type="button"
-            onClick={handleToggleMode}
-            className="btn-secondary"
-          >
+          <button type="button" onClick={handleToggleMode} className="btn-secondary">
             {isNewUser ? 'Already have an account?' : 'Create new account'}
           </button>
         </form>

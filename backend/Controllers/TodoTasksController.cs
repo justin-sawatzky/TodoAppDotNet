@@ -1,10 +1,10 @@
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.DTOs;
-using TodoApp.Models;
 using TodoApp.Generated;
-using System.Linq;
+using TodoApp.Models;
 
 namespace TodoApp.Controllers;
 
@@ -31,7 +31,9 @@ public class TodoTasksController : ControllerBase
             .Where(t => t.UserId == userId && t.ListId == listId);
 
         if (completed.HasValue)
+        {
             query = query.Where(t => t.Completed == completed.Value);
+        }
 
         // Load all tasks and order by Order field, then by CreatedAt
         var tasks = await query.ToListAsync();
@@ -88,7 +90,9 @@ public class TodoTasksController : ControllerBase
             .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
 
         if (task == null)
+        {
             return NotFound(new { message = "Task not found" });
+        }
 
         return Ok(MapToResponse(task));
     }
@@ -109,19 +113,27 @@ public class TodoTasksController : ControllerBase
             .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
 
         if (task == null)
+        {
             return NotFound(new { message = "Task not found" });
+        }
 
         // For update operations, we only update fields that are provided and not empty/default
         if (!string.IsNullOrWhiteSpace(request.Description))
+        {
             task.Description = request.Description;
+        }
 
         // For boolean, we only update it if it's provided (not null)
         if (request.Completed.HasValue)
+        {
             task.Completed = request.Completed.Value;
+        }
 
         // For order, we only update if it's provided (not null)
         if (request.Order.HasValue)
+        {
             task.Order = (int)request.Order.Value;
+        }
 
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -140,7 +152,9 @@ public class TodoTasksController : ControllerBase
             .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
 
         if (task == null)
+        {
             return NotFound(new { message = "Task not found" });
+        }
 
         _context.TodoTasks.Remove(task);
         await _context.SaveChangesAsync();

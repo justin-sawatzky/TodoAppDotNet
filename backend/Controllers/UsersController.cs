@@ -1,8 +1,8 @@
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using TodoApp.DTOs;
-using TodoApp.Services;
 using TodoApp.Generated;
-using System.Linq;
+using TodoApp.Services;
 
 namespace TodoApp.Controllers;
 
@@ -52,7 +52,7 @@ public class UsersController : ControllerBase
                 Username = request.Username,
                 Email = request.Email
             };
-            
+
             var result = await _userService.CreateUserAsync(serviceRequest, cancellationToken);
             return Ok(result);
         }
@@ -109,7 +109,7 @@ public class UsersController : ControllerBase
                 Username = request.Username,
                 Email = request.Email
             };
-            
+
             var result = await _userService.UpdateUserAsync(userId, serviceRequest, cancellationToken);
             return Ok(result);
         }

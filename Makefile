@@ -1,6 +1,6 @@
 # TodoApp Docker Makefile
 
-.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all
+.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all format format-frontend format-backend lint lint-frontend lint-backend
 
 help: ## Show this help message
 	@echo "TodoApp Docker Commands:"
@@ -55,6 +55,33 @@ generate-backend-types: generate-openapi ## Generate C# DTOs for backend from Op
 
 generate-all: generate-frontend-types generate-backend-types ## Generate all code from Smithy model (OpenAPI + Frontend types + Backend DTOs)
 	@echo "✅ All code generation complete"
+
+# Formatting and Linting Commands
+format: format-backend format-frontend ## Format all code (backend + frontend)
+
+format-backend: ## Format backend C# code
+	@echo "Formatting backend C# code..."
+	cd backend && dotnet format
+	@echo "✅ Backend code formatted"
+
+format-frontend: ## Format frontend TypeScript/React code
+	@echo "Formatting frontend code..."
+	cd frontend/TodoAppFrontend && npm run format
+	@echo "✅ Frontend code formatted"
+
+lint: lint-backend lint-frontend ## Lint all code (backend + frontend)
+
+lint-backend: ## Lint backend C# code
+	@echo "Linting backend C# code..."
+	cd backend && dotnet format --verify-no-changes
+	@echo "✅ Backend code linting passed"
+
+lint-frontend: ## Lint frontend TypeScript/React code
+	@echo "Linting frontend code..."
+	cd frontend/TodoAppFrontend && npm run lint
+	@echo "Checking frontend code formatting..."
+	cd frontend/TodoAppFrontend && npm run format:check
+	@echo "✅ Frontend code linting passed"
 
 watch-model: ## Watch model files and regenerate code on changes (requires 'entr' tool)
 	@echo "Watching model files for changes... (Press Ctrl+C to stop)"

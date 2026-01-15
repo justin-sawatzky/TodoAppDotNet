@@ -18,7 +18,7 @@ public class SqliteUserRepository : IUserRepository
         // Convert to client evaluation for SQLite compatibility with DateTimeOffset
         var allUsers = await _context.Users.ToListAsync(cancellationToken);
         var orderedUsers = allUsers.OrderBy(u => u.CreatedAt).ToList();
-        
+
         int skip = 0;
         if (!string.IsNullOrEmpty(nextToken) && int.TryParse(nextToken, out var tokenIndex))
         {

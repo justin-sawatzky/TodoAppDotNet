@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { User, TodoList, TodoTask } from '../types';
 import { useApiError } from '../hooks/useApiError';
@@ -21,27 +21,86 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const { error, handleApiCall, clearError, handleError } = useApiError();
 
   // Helper function to handle user invalidation
-  const handleUserInvalidation = (error: any) => {
-    if (error?.type === 'not_found' || error?.response?.status === 404 || error?.status === 404) {
-      setTimeout(() => {
-        onUserInvalidated();
-      }, 2000);
-      return true;
-    }
-    return false;
-  };
+  const handleUserInvalidation = useCallback(
+    (error: unknown) => {
+      if (
+        error &&
+        typeof error === 'object' &&
+        ('type' in error
+          ? error.type === 'not_found'
+          : 'response' in error && typeof error.response === 'object' && error.response !== null
+            ? 'status' in error.response && error.response.status === 404
+            : 'status' in error && error.status === 404)
+      ) {
+        setTimeout(() => {
+          onUserInvalidated();
+        }, 2000);
+        return true;
+      }
+      return false;
+    },
+    [onUserInvalidated]
+  );
 
   useEffect(() => {
+    let isMounted = true;
+
+    const loadLists = async () => {
+      const { data, error: apiError } = await handleApiCall(
+        () => api.lists.list(user.userId),
+        'load lists'
+      );
+
+      if (!isMounted) return;
+
+      if (apiError) {
+        handleUserInvalidation(apiError);
+        return;
+      }
+
+      if (data?.lists) {
+        setLists(data.lists as TodoList[]);
+      }
+    };
+
     loadLists();
-  }, [user.userId]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user.userId, handleApiCall, handleUserInvalidation]);
 
   useEffect(() => {
-    if (selectedList) {
-      loadTasks(selectedList.listId);
-    }
-  }, [selectedList]);
+    if (!selectedList) return;
 
-  const loadLists = async () => {
+    let isMounted = true;
+
+    const loadTasks = async () => {
+      const { data, error: apiError } = await handleApiCall(
+        () => api.tasks.list(user.userId, selectedList.listId),
+        'load tasks'
+      );
+
+      if (!isMounted) return;
+
+      if (apiError) {
+        handleUserInvalidation(apiError);
+        return;
+      }
+
+      if (data?.tasks) {
+        setTasks(data.tasks as TodoTask[]);
+      }
+    };
+
+    loadTasks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedList, user.userId, handleApiCall, handleUserInvalidation]);
+
+  const loadListsAfterUpdate = async () => {
     const { data, error: apiError } = await handleApiCall(
       () => api.lists.list(user.userId),
       'load lists'
@@ -57,9 +116,11 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     }
   };
 
-  const loadTasks = async (listId: string) => {
+  const loadTasksAfterUpdate = async () => {
+    if (!selectedList) return;
+
     const { data, error: apiError } = await handleApiCall(
-      () => api.tasks.list(user.userId, listId),
+      () => api.tasks.list(user.userId, selectedList.listId),
       'load tasks'
     );
 
@@ -78,7 +139,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     if (!newListName.trim()) return;
 
     setLoading(true);
-    
+
     const { data, error: apiError } = await handleApiCall(
       () => api.lists.create(user.userId, newListName),
       'create list'
@@ -90,10 +151,10 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     }
 
     if (data) {
-      await loadLists();
+      await loadListsAfterUpdate();
       setNewListName('');
     }
-    
+
     setLoading(false);
   };
 
@@ -104,7 +165,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
 
   const handleDeleteList = async (listId: string) => {
     if (!confirm('Are you sure you want to delete this list?')) return;
-    
+
     const { error: apiError } = await handleApiCall(
       () => api.lists.delete(user.userId, listId),
       'delete list'
@@ -113,22 +174,20 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     if (apiError) {
       return;
     }
-    
+
     if (selectedList?.listId === listId) {
       setSelectedList(null);
       setTasks([]);
     }
-    await loadLists();
+    await loadListsAfterUpdate();
   };
 
   const handleTaskUpdate = async () => {
-    if (selectedList) {
-      await loadTasks(selectedList.listId);
-    }
+    await loadTasksAfterUpdate();
   };
 
   // Pass error handling to TaskList component
-  const handleTaskError = (apiError: any, operation: string) => {
+  const handleTaskError = (apiError: unknown, operation: string) => {
     const parsedError = handleError(apiError, operation);
     return handleUserInvalidation(parsedError);
   };
@@ -139,7 +198,9 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
         <h1>Todo App</h1>
         <div className="user-info">
           <span>{user.username}</span>
-          <button onClick={onLogout} className="btn-logout">Logout</button>
+          <button onClick={onLogout} className="btn-logout">
+            Logout
+          </button>
         </div>
       </header>
 
@@ -159,7 +220,9 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
               placeholder="New list name..."
               disabled={loading}
             />
-            <button type="submit" disabled={loading}>+</button>
+            <button type="submit" disabled={loading}>
+              +
+            </button>
           </form>
 
           <ul className="list-items">
@@ -168,10 +231,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
                 key={list.listId}
                 className={selectedList?.listId === list.listId ? 'active' : ''}
               >
-                <button
-                  onClick={() => handleSelectList(list)}
-                  className="list-item-button"
-                >
+                <button onClick={() => handleSelectList(list)} className="list-item-button">
                   {list.name}
                 </button>
                 <button

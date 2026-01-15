@@ -1,5 +1,5 @@
-namespace example.todoapp
-{
+namespace example.todoapp;
+
 // Smithy use
 // use aws.protocols#restJson1
 // use example.todoapp.resources#User
@@ -20,8 +20,7 @@ public interface ITodoAppDotNet
 }
 
 [ApiController]
-[Route("api//todo-app-dot-net")]
+[Route("api/todo-app-dot-net")]
 public class TodoAppDotNetController : ControllerBase, ITodoAppDotNet
 {
-}
 }

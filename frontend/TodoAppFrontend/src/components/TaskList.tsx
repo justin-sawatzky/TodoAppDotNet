@@ -10,7 +10,7 @@ interface TaskListProps {
   list: TodoList;
   tasks: TodoTask[];
   onTaskUpdate: () => void;
-  onApiError: (error: any, operation: string) => boolean; // Returns true if user was invalidated
+  onApiError: (error: unknown, operation: string) => boolean; // Returns true if user was invalidated
 }
 
 export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskListProps) {
@@ -49,13 +49,7 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
 
   const handleToggleComplete = async (task: TodoTask) => {
     const { error: apiError } = await handleApiCall(
-      () => api.tasks.update(
-        user.userId,
-        list.listId,
-        task.taskId,
-        undefined,
-        !task.completed
-      ),
+      () => api.tasks.update(user.userId, list.listId, task.taskId, undefined, !task.completed),
       'update task'
     );
 
@@ -79,13 +73,7 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
     if (!editingDescription.trim()) return;
 
     const { error: apiError } = await handleApiCall(
-      () => api.tasks.update(
-        user.userId,
-        list.listId,
-        taskId,
-        editingDescription,
-        undefined
-      ),
+      () => api.tasks.update(user.userId, list.listId, taskId, editingDescription, undefined),
       'update task'
     );
 
@@ -144,34 +132,24 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
 
   const handleDragEnd = async () => {
     if (!draggedTaskId) return;
-    
+
     // Update the order of all tasks based on their new positions
-    const updates = orderedTasks.map((task, index) => 
-      api.tasks.update(
-        user.userId,
-        list.listId,
-        task.taskId,
-        undefined,
-        undefined,
-        index
-      )
+    const updates = orderedTasks.map((task, index) =>
+      api.tasks.update(user.userId, list.listId, task.taskId, undefined, undefined, index)
     );
-    
-    const { error: apiError } = await handleApiCall(
-      async () => {
-        const results = await Promise.all(updates);
-        
-        // Check if any of the updates failed
-        const hasError = results.some(result => result.error);
-        if (hasError) {
-          const firstError = results.find(r => r.error)?.error;
-          throw firstError;
-        }
-        
-        return { data: results };
-      },
-      'reorder tasks'
-    );
+
+    const { error: apiError } = await handleApiCall(async () => {
+      const results = await Promise.all(updates);
+
+      // Check if any of the updates failed
+      const hasError = results.some((result) => result.error);
+      if (hasError) {
+        const firstError = results.find((r) => r.error)?.error;
+        throw firstError;
+      }
+
+      return { data: results };
+    }, 'reorder tasks');
 
     if (apiError) {
       if (onApiError(apiError, 'reorder tasks')) {
@@ -181,7 +159,7 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
       setDraggedTaskId(null);
       return;
     }
-    
+
     setDraggedTaskId(null);
     onTaskUpdate();
   };
@@ -221,7 +199,7 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
               onDragEnd={handleDragEnd}
             >
               <div className="drag-handle">⋮⋮</div>
-              
+
               <input
                 type="checkbox"
                 checked={task.completed}
@@ -250,10 +228,7 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
                 </div>
               ) : (
                 <>
-                  <span
-                    className="task-description"
-                    onClick={() => handleStartEdit(task)}
-                  >
+                  <span className="task-description" onClick={() => handleStartEdit(task)}>
                     {task.description}
                   </span>
                   <button
