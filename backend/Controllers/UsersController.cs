@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using TodoApp.DTOs;
 using TodoApp.Services;
+using TodoApp.Generated;
+using System.Linq;
 
 namespace TodoApp.Controllers;
 
@@ -34,12 +36,24 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<UserResponse>> CreateUser(
-        [FromBody] CreateUserRequest request,
+        [FromBody] CreateUserRequestContent request,
         CancellationToken cancellationToken = default)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
         try
         {
-            var result = await _userService.CreateUserAsync(request, cancellationToken);
+            // Convert generated DTO to service DTO
+            var serviceRequest = new CreateUserRequest
+            {
+                Username = request.Username,
+                Email = request.Email
+            };
+            
+            var result = await _userService.CreateUserAsync(serviceRequest, cancellationToken);
             return Ok(result);
         }
         catch (ArgumentException ex)
@@ -79,12 +93,24 @@ public class UsersController : ControllerBase
     [HttpPut("{userId}")]
     public async Task<ActionResult<UserResponse>> UpdateUser(
         string userId,
-        [FromBody] UpdateUserRequest request,
+        [FromBody] UpdateUserRequestContent request,
         CancellationToken cancellationToken = default)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
         try
         {
-            var result = await _userService.UpdateUserAsync(userId, request, cancellationToken);
+            // Convert generated DTO to service DTO
+            var serviceRequest = new UpdateUserRequest
+            {
+                Username = request.Username,
+                Email = request.Email
+            };
+            
+            var result = await _userService.UpdateUserAsync(userId, serviceRequest, cancellationToken);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)

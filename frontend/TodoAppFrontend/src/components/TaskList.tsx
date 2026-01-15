@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { User, TodoList, TodoTask } from '../types';
+import { useApiError } from '../hooks/useApiError';
+import { ErrorDisplay } from './ErrorDisplay';
 import './TaskList.css';
 
 interface TaskListProps {
@@ -8,7 +10,7 @@ interface TaskListProps {
   list: TodoList;
   tasks: TodoTask[];
   onTaskUpdate: () => void;
-  onApiError: (error: any, operation: string) => void;
+  onApiError: (error: any, operation: string) => boolean; // Returns true if user was invalidated
 }
 
 export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskListProps) {
@@ -17,6 +19,7 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
   const [editingDescription, setEditingDescription] = useState('');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [orderedTasks, setOrderedTasks] = useState<TodoTask[]>(tasks);
+  const { error, handleApiCall, clearError } = useApiError();
 
   // Update ordered tasks when tasks prop changes
   useEffect(() => {
@@ -27,81 +30,96 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
     e.preventDefault();
     if (!newTaskDescription.trim()) return;
 
-    try {
-      const { error } = await api.tasks.create(user.userId, list.listId, newTaskDescription);
-      if (error) {
-        onApiError(error, 'create task');
+    const { error: apiError } = await handleApiCall(
+      () => api.tasks.create(user.userId, list.listId, newTaskDescription),
+      'create task'
+    );
+
+    if (apiError) {
+      // Check if user was invalidated
+      if (onApiError(apiError, 'create task')) {
         return;
       }
-      setNewTaskDescription('');
-      onTaskUpdate();
-    } catch (error) {
-      onApiError(error, 'create task');
+      return;
     }
+
+    setNewTaskDescription('');
+    onTaskUpdate();
   };
 
   const handleToggleComplete = async (task: TodoTask) => {
-    try {
-      const { error } = await api.tasks.update(
+    const { error: apiError } = await handleApiCall(
+      () => api.tasks.update(
         user.userId,
         list.listId,
         task.taskId,
         undefined,
         !task.completed
-      );
-      if (error) {
-        onApiError(error, 'update task');
+      ),
+      'update task'
+    );
+
+    if (apiError) {
+      if (onApiError(apiError, 'update task')) {
         return;
       }
-      onTaskUpdate();
-    } catch (error) {
-      onApiError(error, 'update task');
+      return;
     }
+
+    onTaskUpdate();
   };
 
   const handleStartEdit = (task: TodoTask) => {
     setEditingTaskId(task.taskId);
     setEditingDescription(task.description);
+    clearError(); // Clear any existing errors when starting edit
   };
 
   const handleSaveEdit = async (taskId: string) => {
     if (!editingDescription.trim()) return;
 
-    try {
-      const { error } = await api.tasks.update(
+    const { error: apiError } = await handleApiCall(
+      () => api.tasks.update(
         user.userId,
         list.listId,
         taskId,
         editingDescription,
         undefined
-      );
-      if (error) {
-        onApiError(error, 'update task');
+      ),
+      'update task'
+    );
+
+    if (apiError) {
+      if (onApiError(apiError, 'update task')) {
         return;
       }
-      setEditingTaskId(null);
-      onTaskUpdate();
-    } catch (error) {
-      onApiError(error, 'update task');
+      return;
     }
+
+    setEditingTaskId(null);
+    onTaskUpdate();
   };
 
   const handleCancelEdit = () => {
     setEditingTaskId(null);
     setEditingDescription('');
+    clearError(); // Clear any existing errors when canceling edit
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    try {
-      const { error } = await api.tasks.delete(user.userId, list.listId, taskId);
-      if (error) {
-        onApiError(error, 'delete task');
+    const { error: apiError } = await handleApiCall(
+      () => api.tasks.delete(user.userId, list.listId, taskId),
+      'delete task'
+    );
+
+    if (apiError) {
+      if (onApiError(apiError, 'delete task')) {
         return;
       }
-      onTaskUpdate();
-    } catch (error) {
-      onApiError(error, 'delete task');
+      return;
     }
+
+    onTaskUpdate();
   };
 
   const handleDragStart = (taskId: string) => {
@@ -127,34 +145,45 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
   const handleDragEnd = async () => {
     if (!draggedTaskId) return;
     
-    try {
-      // Update the order of all tasks based on their new positions
-      const updates = orderedTasks.map((task, index) => 
-        api.tasks.update(
-          user.userId,
-          list.listId,
-          task.taskId,
-          undefined,
-          undefined,
-          index
-        )
-      );
-      
-      const results = await Promise.all(updates);
-      
-      // Check if any of the updates failed
-      const hasError = results.some(result => result.error);
-      if (hasError) {
-        onApiError(results.find(r => r.error)?.error, 'reorder tasks');
+    // Update the order of all tasks based on their new positions
+    const updates = orderedTasks.map((task, index) => 
+      api.tasks.update(
+        user.userId,
+        list.listId,
+        task.taskId,
+        undefined,
+        undefined,
+        index
+      )
+    );
+    
+    const { error: apiError } = await handleApiCall(
+      async () => {
+        const results = await Promise.all(updates);
+        
+        // Check if any of the updates failed
+        const hasError = results.some(result => result.error);
+        if (hasError) {
+          const firstError = results.find(r => r.error)?.error;
+          throw firstError;
+        }
+        
+        return { data: results };
+      },
+      'reorder tasks'
+    );
+
+    if (apiError) {
+      if (onApiError(apiError, 'reorder tasks')) {
+        setDraggedTaskId(null);
         return;
       }
-      
       setDraggedTaskId(null);
-      onTaskUpdate();
-    } catch (error) {
-      onApiError(error, 'reorder tasks');
-      setDraggedTaskId(null);
+      return;
     }
+    
+    setDraggedTaskId(null);
+    onTaskUpdate();
   };
 
   return (
@@ -173,6 +202,8 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
         />
         <button type="submit">Add Task</button>
       </form>
+
+      <ErrorDisplay error={error} onDismiss={clearError} className="compact" />
 
       <div className="tasks">
         {orderedTasks.length === 0 ? (

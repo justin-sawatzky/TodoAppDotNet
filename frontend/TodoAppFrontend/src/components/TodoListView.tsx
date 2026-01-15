@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { User, TodoList, TodoTask } from '../types';
+import { useApiError } from '../hooks/useApiError';
+import { ErrorDisplay } from './ErrorDisplay';
 import { TaskList } from './TaskList';
 import './TodoListView.css';
 
@@ -16,24 +18,17 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const [tasks, setTasks] = useState<TodoTask[]>([]);
   const [newListName, setNewListName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, handleApiCall, clearError, handleError } = useApiError();
 
-  // Helper function to handle API errors
-  const handleApiError = (error: any, operation: string) => {
-    console.error(`Error during ${operation}:`, error);
-    
-    // Check if it's a 404 error which might indicate the user doesn't exist
-    if (error?.response?.status === 404 || error?.status === 404) {
-      setError(`User not found. You will be logged out.`);
+  // Helper function to handle user invalidation
+  const handleUserInvalidation = (error: any) => {
+    if (error?.type === 'not_found' || error?.response?.status === 404 || error?.status === 404) {
       setTimeout(() => {
         onUserInvalidated();
       }, 2000);
-      return;
+      return true;
     }
-    
-    // Handle other API errors
-    setError(`Failed to ${operation}. Please try again.`);
-    setTimeout(() => setError(null), 5000);
+    return false;
   };
 
   useEffect(() => {
@@ -47,34 +42,34 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   }, [selectedList]);
 
   const loadLists = async () => {
-    try {
-      const { data, error } = await api.lists.list(user.userId);
-      if (error) {
-        handleApiError(error, 'load lists');
-        return;
-      }
-      if (data?.lists) {
-        setLists(data.lists as TodoList[]);
-        setError(null); // Clear any previous errors
-      }
-    } catch (error) {
-      handleApiError(error, 'load lists');
+    const { data, error: apiError } = await handleApiCall(
+      () => api.lists.list(user.userId),
+      'load lists'
+    );
+
+    if (apiError) {
+      handleUserInvalidation(apiError);
+      return;
+    }
+
+    if (data?.lists) {
+      setLists(data.lists as TodoList[]);
     }
   };
 
   const loadTasks = async (listId: string) => {
-    try {
-      const { data, error } = await api.tasks.list(user.userId, listId);
-      if (error) {
-        handleApiError(error, 'load tasks');
-        return;
-      }
-      if (data?.tasks) {
-        setTasks(data.tasks as TodoTask[]);
-        setError(null); // Clear any previous errors
-      }
-    } catch (error) {
-      handleApiError(error, 'load tasks');
+    const { data, error: apiError } = await handleApiCall(
+      () => api.tasks.list(user.userId, listId),
+      'load tasks'
+    );
+
+    if (apiError) {
+      handleUserInvalidation(apiError);
+      return;
+    }
+
+    if (data?.tasks) {
+      setTasks(data.tasks as TodoTask[]);
     }
   };
 
@@ -83,53 +78,59 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     if (!newListName.trim()) return;
 
     setLoading(true);
-    try {
-      const { data, error } = await api.lists.create(user.userId, newListName);
-      if (error) {
-        handleApiError(error, 'create list');
-        setLoading(false);
-        return;
-      }
-      if (data) {
-        await loadLists();
-        setNewListName('');
-        setError(null); // Clear any previous errors
-      }
-    } catch (error) {
-      handleApiError(error, 'create list');
+    
+    const { data, error: apiError } = await handleApiCall(
+      () => api.lists.create(user.userId, newListName),
+      'create list'
+    );
+
+    if (apiError) {
+      setLoading(false);
+      return;
     }
+
+    if (data) {
+      await loadLists();
+      setNewListName('');
+    }
+    
     setLoading(false);
   };
 
   const handleSelectList = (list: TodoList) => {
     setSelectedList(list);
+    clearError(); // Clear any existing errors when switching lists
   };
 
   const handleDeleteList = async (listId: string) => {
     if (!confirm('Are you sure you want to delete this list?')) return;
     
-    try {
-      const { error } = await api.lists.delete(user.userId, listId);
-      if (error) {
-        handleApiError(error, 'delete list');
-        return;
-      }
-      
-      if (selectedList?.listId === listId) {
-        setSelectedList(null);
-        setTasks([]);
-      }
-      await loadLists();
-      setError(null); // Clear any previous errors
-    } catch (error) {
-      handleApiError(error, 'delete list');
+    const { error: apiError } = await handleApiCall(
+      () => api.lists.delete(user.userId, listId),
+      'delete list'
+    );
+
+    if (apiError) {
+      return;
     }
+    
+    if (selectedList?.listId === listId) {
+      setSelectedList(null);
+      setTasks([]);
+    }
+    await loadLists();
   };
 
   const handleTaskUpdate = async () => {
     if (selectedList) {
       await loadTasks(selectedList.listId);
     }
+  };
+
+  // Pass error handling to TaskList component
+  const handleTaskError = (apiError: any, operation: string) => {
+    const parsedError = handleError(apiError, operation);
+    return handleUserInvalidation(parsedError);
   };
 
   return (
@@ -142,18 +143,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
         </div>
       </header>
 
-      {error && (
-        <div className="error-banner" style={{ 
-          backgroundColor: '#fee', 
-          color: '#c33', 
-          padding: '10px', 
-          margin: '10px', 
-          borderRadius: '4px',
-          border: '1px solid #fcc'
-        }}>
-          {error}
-        </div>
-      )}
+      <ErrorDisplay error={error} onDismiss={clearError} />
 
       <div className="main-content">
         <aside className="sidebar">
@@ -203,7 +193,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
               list={selectedList}
               tasks={tasks}
               onTaskUpdate={handleTaskUpdate}
-              onApiError={handleApiError}
+              onApiError={handleTaskError}
             />
           ) : (
             <div className="empty-state">

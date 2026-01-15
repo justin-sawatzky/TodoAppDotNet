@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.DTOs;
 using TodoApp.Models;
+using TodoApp.Generated;
+using System.Linq;
 
 namespace TodoApp.Controllers;
 
@@ -39,8 +41,13 @@ public class TodoListsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TodoListResponse>> CreateTodoList(
         string userId,
-        [FromBody] CreateTodoListRequest request)
+        [FromBody] CreateTodoListRequestContent request)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
         var list = new TodoList
         {
             UserId = userId,
@@ -73,8 +80,13 @@ public class TodoListsController : ControllerBase
     public async Task<ActionResult<TodoListResponse>> UpdateTodoList(
         string userId,
         string listId,
-        [FromBody] UpdateTodoListRequest request)
+        [FromBody] UpdateTodoListRequestContent request)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
         var list = await _context.TodoLists
             .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
 

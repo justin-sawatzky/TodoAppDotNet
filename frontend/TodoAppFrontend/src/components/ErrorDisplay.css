@@ -1,0 +1,141 @@
+.error-display {
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  border: 1px solid;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.error-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.error-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.error-details {
+  flex: 1;
+}
+
+.error-message {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.error-dismiss {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.error-dismiss:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Validation-specific styles */
+.validation-details {
+  margin-top: 8px;
+}
+
+.validation-error {
+  margin-bottom: 8px;
+}
+
+.validation-error:last-child {
+  margin-bottom: 0;
+}
+
+.validation-message {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.validation-hint {
+  font-size: 12px;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* Error type styles */
+.error-validation {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.error-validation .error-dismiss:hover {
+  background-color: rgba(133, 100, 4, 0.1);
+}
+
+.error-not-found {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.error-not-found .error-dismiss:hover {
+  background-color: rgba(12, 84, 96, 0.1);
+}
+
+.error-conflict {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.error-conflict .error-dismiss:hover {
+  background-color: rgba(114, 28, 36, 0.1);
+}
+
+.error-network {
+  background-color: #e2e3e5;
+  border-color: #d6d8db;
+  color: #383d41;
+}
+
+.error-network .error-dismiss:hover {
+  background-color: rgba(56, 61, 65, 0.1);
+}
+
+.error-server {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.error-server .error-dismiss:hover {
+  background-color: rgba(114, 28, 36, 0.1);
+}
+
+/* Compact variant for inline errors */
+.error-display.compact {
+  padding: 8px 12px;
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.error-display.compact .error-icon {
+  font-size: 16px;
+}
+
+.error-display.compact .validation-hint {
+  font-size: 11px;
+}

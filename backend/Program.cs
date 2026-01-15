@@ -2,11 +2,28 @@ using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.Services;
 using TodoApp.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Configure API behavior for automatic model validation
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors)
+            .Select(x => x.ErrorMessage);
+        
+        var errorResponse = new { Message = "Validation failed: " + string.Join(", ", errors) };
+        return new BadRequestObjectResult(errorResponse);
+    };
+});
+
 builder.Services.AddOpenApi();
 
 // Configure Entity Framework with in-memory database (with optional disk persistence for debugging)

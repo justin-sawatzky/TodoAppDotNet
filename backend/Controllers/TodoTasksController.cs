@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.DTOs;
 using TodoApp.Models;
+using TodoApp.Generated;
+using System.Linq;
 
 namespace TodoApp.Controllers;
 
@@ -45,8 +47,13 @@ public class TodoTasksController : ControllerBase
     public async Task<ActionResult<TodoTaskResponse>> CreateTodoTask(
         string userId,
         string listId,
-        [FromBody] CreateTodoTaskRequest request)
+        [FromBody] CreateTodoTaskRequestContent request)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
         // Get the max order value for this list
         var maxOrder = await _context.TodoTasks
             .Where(t => t.UserId == userId && t.ListId == listId)
@@ -60,7 +67,7 @@ public class TodoTasksController : ControllerBase
             TaskId = Guid.NewGuid().ToString(),
             Description = request.Description,
             Completed = request.Completed,
-            Order = request.Order ?? (maxOrder + 1),
+            Order = (int)(request.Order == 0 ? (maxOrder + 1) : request.Order),
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
@@ -91,8 +98,13 @@ public class TodoTasksController : ControllerBase
         string userId,
         string listId,
         string taskId,
-        [FromBody] UpdateTodoTaskRequest request)
+        [FromBody] UpdateTodoTaskRequestContent request)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
         var task = await _context.TodoTasks
             .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
 
@@ -102,11 +114,16 @@ public class TodoTasksController : ControllerBase
         if (!string.IsNullOrWhiteSpace(request.Description))
             task.Description = request.Description;
 
-        if (request.Completed.HasValue)
-            task.Completed = request.Completed.Value;
+        // For update operations, we only update fields that are provided and not empty/default
+        if (!string.IsNullOrWhiteSpace(request.Description))
+            task.Description = request.Description;
 
-        if (request.Order.HasValue)
-            task.Order = request.Order.Value;
+        // For boolean, we'll always update it since there's no way to distinguish "not provided" from "false"
+        task.Completed = request.Completed;
+
+        // For order, we'll only update if it's not the default value (0)
+        if (request.Order > 0)
+            task.Order = (int)request.Order;
 
         task.UpdatedAt = DateTimeOffset.UtcNow;
 

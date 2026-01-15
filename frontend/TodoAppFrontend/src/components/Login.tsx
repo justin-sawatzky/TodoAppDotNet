@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { api } from '../api/client';
 import type { User } from '../types';
+import { useApiError } from '../hooks/useApiError';
+import { ErrorDisplay } from './ErrorDisplay';
 import './Login.css';
 
 interface LoginProps {
@@ -11,47 +13,61 @@ export function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { error, handleApiCall, clearError } = useApiError();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
-    try {
-      if (isNewUser) {
-        // Create new user
-        const { data, error } = await api.users.create(email, username);
-        if (error) {
-          setError('Failed to create user. Email may already exist.');
-          setLoading(false);
-          return;
-        }
-        if (data) {
-          onLogin(data as User);
-        }
-      } else {
-        // Find existing user by email
-        const { data, error } = await api.users.list();
-        if (error) {
-          setError('Failed to fetch users');
-          setLoading(false);
-          return;
-        }
-        
-        const user = data?.users?.find((u) => u.email === email);
-        if (user) {
-          onLogin(user as User);
-        } else {
-          setError('User not found. Please create a new account.');
-        }
+    if (isNewUser) {
+      // Create new user
+      const { data, error: apiError } = await handleApiCall(
+        () => api.users.create(email, username),
+        'create user'
+      );
+      
+      if (apiError) {
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+      
+      if (data) {
+        onLogin(data as User);
+      }
+    } else {
+      // Find existing user by email
+      const { data, error: apiError } = await handleApiCall(
+        () => api.users.list(),
+        'fetch users'
+      );
+      
+      if (apiError) {
+        setLoading(false);
+        return;
+      }
+      
+      const user = data?.users?.find((u) => u.email === email);
+      if (user) {
+        onLogin(user as User);
+      } else {
+        // Create a custom "not found" error for better UX
+        await handleApiCall(
+          () => Promise.reject({ 
+            response: { status: 404 }, 
+            data: { message: 'User not found. Please create a new account or check your email address.' }
+          }),
+          'find user'
+        );
+      }
     }
+    
+    setLoading(false);
+  };
+
+  const handleToggleMode = () => {
+    setIsNewUser(!isNewUser);
+    clearError(); // Clear any existing errors when switching modes
   };
 
   return (
@@ -80,12 +96,12 @@ export function Login({ onLogin }: LoginProps) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="Your name"
+                placeholder="Your username"
               />
             </div>
           )}
 
-          {error && <div className="error-message">{error}</div>}
+          <ErrorDisplay error={error} onDismiss={clearError} />
 
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Loading...' : isNewUser ? 'Create Account' : 'Login'}
@@ -93,7 +109,7 @@ export function Login({ onLogin }: LoginProps) {
 
           <button
             type="button"
-            onClick={() => setIsNewUser(!isNewUser)}
+            onClick={handleToggleMode}
             className="btn-secondary"
           >
             {isNewUser ? 'Already have an account?' : 'Create new account'}
