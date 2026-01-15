@@ -111,19 +111,17 @@ public class TodoTasksController : ControllerBase
         if (task == null)
             return NotFound(new { message = "Task not found" });
 
-        if (!string.IsNullOrWhiteSpace(request.Description))
-            task.Description = request.Description;
-
         // For update operations, we only update fields that are provided and not empty/default
         if (!string.IsNullOrWhiteSpace(request.Description))
             task.Description = request.Description;
 
-        // For boolean, we'll always update it since there's no way to distinguish "not provided" from "false"
-        task.Completed = request.Completed;
+        // For boolean, we only update it if it's provided (not null)
+        if (request.Completed.HasValue)
+            task.Completed = request.Completed.Value;
 
-        // For order, we'll only update if it's not the default value (0)
-        if (request.Order > 0)
-            task.Order = (int)request.Order;
+        // For order, we only update if it's provided (not null)
+        if (request.Order.HasValue)
+            task.Order = (int)request.Order.Value;
 
         task.UpdatedAt = DateTimeOffset.UtcNow;
 

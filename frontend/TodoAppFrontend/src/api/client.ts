@@ -22,11 +22,16 @@ export const api = {
     list: (userId: string) =>
       client.GET('/users/{userId}/lists', { params: { path: { userId } } }),
     
-    create: (userId: string, name: string, description?: string) =>
-      client.POST('/users/{userId}/lists', {
+    create: (userId: string, name: string, description?: string) => {
+      const body: { name: string; description?: string } = { name };
+      if (description !== undefined && description !== '') {
+        body.description = description;
+      }
+      return client.POST('/users/{userId}/lists', {
         params: { path: { userId } },
-        body: { name, description },
-      }),
+        body,
+      });
+    },
     
     get: (userId: string, listId: string) =>
       client.GET('/users/{userId}/lists/{listId}', {

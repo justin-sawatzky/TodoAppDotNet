@@ -65,9 +65,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// List description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -748,19 +748,19 @@ namespace TodoApp.Generated
         /// <summary>
         /// Task description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("completed", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool Completed { get; set; } = default!;
+        [Newtonsoft.Json.JsonProperty("completed", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool? Completed { get; set; }
 
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double Order { get; set; } = default!;
+        public double? Order { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
