@@ -136,6 +136,7 @@ export interface components {
             description: string;
             /** @default false */
             completed: boolean;
+            order?: number;
         };
         CreateTodoTaskResponseContent: {
             /** @description User identifier */
@@ -145,6 +146,7 @@ export interface components {
             taskId: string;
             description: string;
             completed: boolean;
+            order?: number;
             /** Format: double */
             createdAt: number;
             /** Format: double */
@@ -184,6 +186,7 @@ export interface components {
             taskId: string;
             description: string;
             completed: boolean;
+            order?: number;
             /** Format: double */
             createdAt: number;
             /** Format: double */
@@ -233,6 +236,7 @@ export interface components {
             taskId: string;
             description: string;
             completed: boolean;
+            order?: number;
             /** Format: double */
             createdAt: number;
             /** Format: double */
@@ -257,6 +261,7 @@ export interface components {
         UpdateTodoTaskRequestContent: {
             description?: string;
             completed?: boolean;
+            order?: number;
         };
         UpdateTodoTaskResponseContent: {
             /** @description User identifier */
@@ -266,6 +271,7 @@ export interface components {
             taskId: string;
             description: string;
             completed: boolean;
+            order?: number;
             /** Format: double */
             createdAt: number;
             /** Format: double */

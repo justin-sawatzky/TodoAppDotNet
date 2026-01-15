@@ -1,6 +1,6 @@
 # TodoApp Docker Makefile
 
-.PHONY: help build run stop clean test
+.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all
 
 help: ## Show this help message
 	@echo "TodoApp Docker Commands:"
@@ -9,6 +9,57 @@ help: ## Show this help message
 
 build: ## Build all Docker images
 	docker-compose build --no-cache
+
+# Smithy and Code Generation Commands
+smithy-build: ## Build Smithy model and generate OpenAPI spec
+	@echo "Building Smithy model..."
+	smithy build
+	@echo "✅ Smithy model built successfully"
+
+smithy-validate: ## Validate Smithy model without building
+	@echo "Validating Smithy model..."
+	smithy validate model
+	@echo "✅ Smithy model validation complete"
+
+smithy-clean: ## Clean Smithy build artifacts
+	@echo "Cleaning Smithy build artifacts..."
+	rm -rf build/smithy
+	@echo "✅ Smithy build artifacts cleaned"
+
+generate-openapi: smithy-build ## Generate OpenAPI specification from Smithy model
+	@echo "✅ OpenAPI specification generated at build/smithy/source/openapi/TodoAppDotNet.openapi.json"
+
+generate-frontend-types: generate-openapi ## Generate TypeScript types for frontend from OpenAPI spec
+	@echo "Generating TypeScript types for frontend..."
+	cd frontend/TodoAppFrontend && npm run generate-api
+	@echo "✅ Frontend TypeScript types generated"
+
+generate-backend-types: generate-openapi ## Generate C# DTOs for backend from OpenAPI spec
+	@echo "Generating C# DTOs for backend..."
+	@echo "Installing/updating NSwag.ConsoleCore tool locally..."
+	dotnet tool install NSwag.ConsoleCore --tool-path ./tools || dotnet tool update NSwag.ConsoleCore --tool-path ./tools
+	@echo "Running NSwag code generation..."
+	@mkdir -p backend/Generated
+	./tools/nswag openapi2csclient \
+		/input:build/smithy/source/openapi/TodoAppDotNet.openapi.json \
+		/output:backend/Generated/ApiModels.cs \
+		/namespace:TodoApp.Generated \
+		/generateClientClasses:false \
+		/generateClientInterfaces:false \
+		/generateDtoTypes:true \
+		/generateOptionalPropertiesAsNullable:false \
+		/generateNullableReferenceTypes:true \
+		/jsonLibrary:NewtonsoftJson \
+		/dateTimeType:DateTimeOffset
+	@echo "✅ Backend C# DTOs generated"
+
+generate-all: generate-frontend-types generate-backend-types ## Generate all code from Smithy model (OpenAPI + Frontend types + Backend DTOs)
+	@echo "✅ All code generation complete"
+
+watch-model: ## Watch model files and regenerate code on changes (requires 'entr' tool)
+	@echo "Watching model files for changes... (Press Ctrl+C to stop)"
+	@echo "Note: This requires 'entr' tool. Install with: brew install entr (macOS) or apt-get install entr (Ubuntu)"
+	find model -name "*.smithy" | entr -r make generate-all
 
 run: ## Run the application with docker-compose
 	docker-compose up -d --build

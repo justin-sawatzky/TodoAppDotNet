@@ -15,6 +15,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NSwag.CodeGeneration.CSharp" Version="14.2.0" />
+    <PackageReference Include="NSwag.Core" Version="14.2.0" />
   </ItemGroup>
 
 </Project>

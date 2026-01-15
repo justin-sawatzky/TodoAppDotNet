@@ -150,7 +150,7 @@ npm run dev
 
 ### Modifying the API
 
-1. **Update Smithy Models** in `backend/model/`
+1. **Update Smithy Models** in `model/`
 2. **Build Smithy** to generate OpenAPI:
 ```bash
 cd backend

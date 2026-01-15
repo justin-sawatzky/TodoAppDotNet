@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-api": "openapi-typescript ../../backend/build/smithy/source/openapi/TodoAppDotNet.openapi.json -o src/api/schema.ts"
+    "generate-api": "openapi-typescript ../../build/smithy/source/openapi/TodoAppDotNet.openapi.json -o src/api/schema.ts"
   },
   "dependencies": {
     "openapi-fetch": "^0.15.0",
