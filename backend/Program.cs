@@ -28,38 +28,19 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddOpenApi();
 
 // Configure Entity Framework with in-memory database
-var useInMemoryDb = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", true);
-
-if (useInMemoryDb)
-{
-    builder.Services.AddDbContext<TodoAppDbContext>(options =>
-        options.UseInMemoryDatabase("TodoApp"));
-}
-else
-{
-    builder.Services.AddDbContext<TodoAppDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=todoapp.db"));
-}
+builder.Services.AddDbContext<TodoAppDbContext>(options =>
+    options.UseInMemoryDatabase("TodoApp"));
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITodoListService, TodoListService>();
 builder.Services.AddScoped<ITodoTaskService, TodoTaskService>();
 
-// Register repositories based on database configuration
-if (useInMemoryDb)
-{
-    builder.Services.AddSingleton<InMemoryDataStore>();
-    builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
-    builder.Services.AddSingleton<ITodoListRepository, InMemoryTodoListRepository>();
-    builder.Services.AddSingleton<ITodoTaskRepository, InMemoryTodoTaskRepository>();
-}
-else
-{
-    builder.Services.AddScoped<IUserRepository, SqliteUserRepository>();
-    builder.Services.AddScoped<ITodoListRepository, SqliteTodoListRepository>();
-    builder.Services.AddScoped<ITodoTaskRepository, SqliteTodoTaskRepository>();
-}
+// Register repositories
+builder.Services.AddSingleton<InMemoryDataStore>();
+builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
+builder.Services.AddSingleton<ITodoListRepository, InMemoryTodoListRepository>();
+builder.Services.AddSingleton<ITodoTaskRepository, InMemoryTodoTaskRepository>();
 
 var app = builder.Build();
 
