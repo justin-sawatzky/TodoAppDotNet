@@ -12,6 +12,64 @@ Key architectural highlights:
 - **Clean Architecture**: Separation of concerns with Controllers, Services, and Repositories
 - **Modern Stack**: .NET 9, React 19, TypeScript, and SQLite
 
+## Design Philosophy & Trade-offs
+
+This project was built as a technical assessment, so the technology choices reflect a balance between demonstrating competence with familiar tools and keeping the scope manageable for reviewers.
+
+### Why These Technologies?
+
+**Smithy for API Modeling**: I chose Smithy because I have hands-on experience with it and knew I could leverage its code generation capabilities effectively. The upfront investment in modeling pays off through generated OpenAPI specs, TypeScript types, and C# DTOs — reducing boilerplate and eliminating contract drift between frontend and backend. For a greenfield project, alternatives like OpenAPI-first or code-first approaches are valid, but Smithy's strong typing and extensibility made it a natural fit.
+
+**Docker Compose over Kubernetes**: This application is designed to run locally for assessment purposes, not deployed to cloud infrastructure. Docker Compose provides sufficient orchestration for a multi-container setup without the operational complexity of Kubernetes. For a production deployment, Kubernetes would be worth considering if we needed auto-scaling, rolling deployments, or multi-region distribution.
+
+**Mono-repo Structure**: For a personal or team project, I'd likely split this into separate packages (model, backend, frontend, tests) with independent versioning and CI pipelines. However, a mono-repo makes it easier for assessors to clone once and see the full picture. The clean separation of concerns within the repo means extraction would be straightforward if needed.
+
+### What's Intentionally Out of Scope
+
+**CI/CD Pipelines**: Not implemented, but the project structure supports easy integration with GitHub Actions, GitLab CI, or similar. The Makefile commands (`make lint`, `make test-api`, `make generate-all`) map directly to pipeline stages.
+
+**Authentication & Authorization**: The API currently has no auth layer. In a production environment, I'd integrate with whatever identity provider the organization uses (OAuth2/OIDC, JWT-based auth, etc.) rather than being prescriptive about a specific solution. The clean controller/service separation makes adding an auth middleware straightforward.
+
+**Production Database**: SQLite is embedded for zero-config local development. See the Scalability section for production database considerations.
+
+## Potential Enhancements
+
+If this were a production application, here are features I'd consider adding:
+
+### User-Facing Features
+- **Due dates and reminders**: Add optional due dates to tasks with email/push notification reminders
+- **Recurring tasks**: Support for daily, weekly, or custom recurrence patterns
+- **List sharing**: Allow users to share todo lists with collaborators
+- **Export functionality**: Export lists as CSV, JSON, or printable formats
+
+### Backend Improvements
+- **Authorization layer**: Integrate with an identity provider to secure endpoints and support multi-tenancy
+- **Database migration**: Move from SQLite to a production-grade database (see Scalability section)
+- **Audit logging**: Track changes for compliance and debugging
+- **Rate limiting**: Protect against abuse with request throttling
+
+## Scalability Considerations
+
+This application is architected for local development and assessment, but here's how it could scale for production use:
+
+### Current Limitations
+- **SQLite**: Single-file database, no concurrent write scaling, not suitable for distributed deployments
+- **Single instance**: The Docker Compose setup runs one backend container with no load balancing
+- **In-process state**: No distributed caching or session management
+
+### Horizontal Scaling Path
+
+**Database Layer**: Replace SQLite with a dedicated database server. Two approaches depending on access patterns:
+
+1. **Relational (PostgreSQL/MySQL)**: Good for complex queries, reporting, and if the data model grows more relational. Supports read replicas for scaling reads.
+
+2. **Key-Value/Document Store (DynamoDB, MongoDB)**: Better for high-volume, simple access patterns like "get all tasks for user X." Todo data is naturally document-shaped (user → lists → tasks), and sharding by user ID provides straightforward horizontal scaling. This trades query flexibility for predictable performance at scale.
+
+**Application Layer**: 
+- Run multiple backend instances behind a load balancer
+- Ensure stateless request handling (already the case — no server-side sessions)
+- Add distributed caching (Redis) for frequently accessed data
+
 ## Technical Requirements
 
 ### macOS / Linux
