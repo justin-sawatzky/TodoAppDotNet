@@ -17,15 +17,15 @@ function App() {
       return;
     }
 
-    let isMounted = true;
+    const abortController = new AbortController();
 
     const validateUser = async () => {
       try {
         const parsedUser = JSON.parse(storedUser) as User;
         // Validate that the user still exists in the backend
-        const { data, error } = await api.users.get(parsedUser.userId);
+        const { data, error } = await api.users.get(parsedUser.userId, abortController.signal);
 
-        if (!isMounted) return;
+        if (abortController.signal.aborted) return;
 
         if (data && !error) {
           // User exists in backend, use it
@@ -37,12 +37,12 @@ function App() {
           localStorage.removeItem('currentUser');
         }
       } catch (error) {
-        if (!isMounted) return;
+        if (abortController.signal.aborted) return;
         console.error('Error validating stored user:', error);
         // Clear invalid data from localStorage
         localStorage.removeItem('currentUser');
       } finally {
-        if (isMounted) {
+        if (!abortController.signal.aborted) {
           setIsValidatingUser(false);
         }
       }
@@ -51,7 +51,7 @@ function App() {
     validateUser();
 
     return () => {
-      isMounted = false;
+      abortController.abort();
     };
   }, []);
 

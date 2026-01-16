@@ -4,7 +4,7 @@ namespace TodoApp.Services;
 
 public interface IUserService
 {
-    Task<ListUsersResponseContent> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken);
+    Task<ListUsersResponseContent> ListUsersAsync(int? maxResults, string? nextToken, CancellationToken cancellationToken);
     Task<UserOutput> CreateUserAsync(CreateUserRequestContent request, CancellationToken cancellationToken);
     Task<UserOutput> GetUserAsync(string userId, CancellationToken cancellationToken);
     Task<UserOutput> GetUserByEmailAsync(string email, CancellationToken cancellationToken);

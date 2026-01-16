@@ -57,7 +57,10 @@ export function TaskList({
     if (!trimmedDescription) {
       if (newTaskDescription.length > 0) {
         // Has content but only whitespace
-        handleError({ message: 'Task description cannot be empty or contain only spaces' }, 'create task');
+        handleError(
+          { message: 'Task description cannot be empty or contain only spaces' },
+          'create task'
+        );
       }
       return;
     }
@@ -182,6 +185,12 @@ export function TaskList({
       order: index,
     }));
 
+    // Store the optimistic state before the API call
+    const optimisticTasks = orderedTasks.map((task, index) => ({
+      ...task,
+      order: index,
+    }));
+
     const { error: apiError } = await handleApiCall(
       () => api.tasks.reorder(user.userId, list.listId, taskOrders),
       'reorder tasks'
@@ -198,8 +207,10 @@ export function TaskList({
       return;
     }
 
+    // On success, keep the optimistic update with correct order values
+    // No need to refetch since we already have the correct state
+    setOrderedTasks(optimisticTasks);
     setDraggedTaskId(null);
-    onTaskUpdate();
   };
 
   return (
@@ -275,7 +286,14 @@ export function TaskList({
               onDragOver={(e) => handleDragOver(e, task.taskId)}
               onDragEnd={handleDragEnd}
             >
-              <div className="drag-handle">⋮⋮</div>
+              <span
+                className="drag-handle"
+                aria-label={`Drag to reorder task: ${task.description}`}
+                role="button"
+                tabIndex={0}
+              >
+                ⋮⋮
+              </span>
 
               <input
                 type="checkbox"

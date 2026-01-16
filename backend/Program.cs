@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
+using TodoApp.Middleware;
 using TodoApp.Repositories;
 using TodoApp.Services;
 
@@ -48,6 +49,7 @@ builder.Services.AddScoped<ITodoTaskService, TodoTaskService>();
 // Register repositories based on database configuration
 if (useInMemoryDb)
 {
+    builder.Services.AddSingleton<InMemoryDataStore>();
     builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
     builder.Services.AddSingleton<ITodoListRepository, InMemoryTodoListRepository>();
     builder.Services.AddSingleton<ITodoTaskRepository, InMemoryTodoTaskRepository>();
@@ -73,6 +75,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Global exception handling
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Don't redirect to HTTPS in Docker container
 // app.UseHttpsRedirection();

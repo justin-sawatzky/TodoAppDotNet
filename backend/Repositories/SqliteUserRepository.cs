@@ -40,12 +40,14 @@ public class SqliteUserRepository : IUserRepository
     public async Task<User?> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
     {
         return await _context.Users
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken);
     }
 
     public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
         return await _context.Users
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 

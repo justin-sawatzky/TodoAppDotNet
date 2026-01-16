@@ -43,6 +43,7 @@ public class SqliteTodoListRepository : ITodoListRepository
     public async Task<TodoList?> GetListByIdAsync(string userId, string listId, CancellationToken cancellationToken)
     {
         return await _context.TodoLists
+            .AsNoTracking()
             .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId, cancellationToken);
     }
 

@@ -22,19 +22,8 @@ public class TodoListsController : ControllerBase
         [FromQuery] string? nextToken,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _todoListService.ListTodoListsAsync(userId, maxResults, nextToken, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoListService.ListTodoListsAsync(userId, maxResults, nextToken, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -43,28 +32,8 @@ public class TodoListsController : ControllerBase
         [FromBody] CreateTodoListRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _todoListService.CreateTodoListAsync(userId, request, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoListService.CreateTodoListAsync(userId, request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("{listId}")]
@@ -73,19 +42,8 @@ public class TodoListsController : ControllerBase
         string listId,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _todoListService.GetTodoListAsync(userId, listId, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoListService.GetTodoListAsync(userId, listId, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{listId}")]
@@ -95,28 +53,8 @@ public class TodoListsController : ControllerBase
         [FromBody] UpdateTodoListRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _todoListService.UpdateTodoListAsync(userId, listId, request, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoListService.UpdateTodoListAsync(userId, listId, request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpDelete("{listId}")]
@@ -125,18 +63,7 @@ public class TodoListsController : ControllerBase
         string listId,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _todoListService.DeleteTodoListAsync(userId, listId, cancellationToken);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        await _todoListService.DeleteTodoListAsync(userId, listId, cancellationToken);
+        return Ok();
     }
 }

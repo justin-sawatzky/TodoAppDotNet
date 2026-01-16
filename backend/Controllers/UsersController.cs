@@ -17,19 +17,12 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<ListUsersResponseContent>> ListUsers(
-        [FromQuery] double? maxResults = null,
+        [FromQuery] int? maxResults = null,
         [FromQuery] string? nextToken = null,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _userService.ListUsersAsync(maxResults, nextToken, cancellationToken);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _userService.ListUsersAsync(maxResults, nextToken, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -37,28 +30,8 @@ public class UsersController : ControllerBase
         [FromBody] CreateUserRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _userService.CreateUserAsync(request, cancellationToken);
-            return Ok(result);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new ConflictExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _userService.CreateUserAsync(request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("{userId}")]
@@ -66,19 +39,8 @@ public class UsersController : ControllerBase
         string userId,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _userService.GetUserAsync(userId, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _userService.GetUserAsync(userId, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("lookup")]
@@ -86,19 +48,8 @@ public class UsersController : ControllerBase
         [FromQuery] string email,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _userService.GetUserByEmailAsync(email, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _userService.GetUserByEmailAsync(email, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{userId}")]
@@ -107,32 +58,8 @@ public class UsersController : ControllerBase
         [FromBody] UpdateUserRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _userService.UpdateUserAsync(userId, request, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new ConflictExceptionResponseContent { Message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _userService.UpdateUserAsync(userId, request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpDelete("{userId}")]
@@ -140,18 +67,7 @@ public class UsersController : ControllerBase
         string userId,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _userService.DeleteUserAsync(userId, cancellationToken);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        await _userService.DeleteUserAsync(userId, cancellationToken);
+        return Ok();
     }
 }

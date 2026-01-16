@@ -24,19 +24,8 @@ public class TodoTasksController : ControllerBase
         [FromQuery] bool? completed,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _todoTaskService.ListTodoTasksAsync(userId, listId, maxResults, nextToken, completed, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoTaskService.ListTodoTasksAsync(userId, listId, maxResults, nextToken, completed, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -46,28 +35,8 @@ public class TodoTasksController : ControllerBase
         [FromBody] CreateTodoTaskRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _todoTaskService.CreateTodoTaskAsync(userId, listId, request, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoTaskService.CreateTodoTaskAsync(userId, listId, request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("{taskId}")]
@@ -77,19 +46,8 @@ public class TodoTasksController : ControllerBase
         string taskId,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var result = await _todoTaskService.GetTodoTaskAsync(userId, listId, taskId, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoTaskService.GetTodoTaskAsync(userId, listId, taskId, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{taskId}")]
@@ -100,28 +58,8 @@ public class TodoTasksController : ControllerBase
         [FromBody] UpdateTodoTaskRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _todoTaskService.UpdateTodoTaskAsync(userId, listId, taskId, request, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoTaskService.UpdateTodoTaskAsync(userId, listId, taskId, request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpDelete("{taskId}")]
@@ -131,19 +69,8 @@ public class TodoTasksController : ControllerBase
         string taskId,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _todoTaskService.DeleteTodoTaskAsync(userId, listId, taskId, cancellationToken);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        await _todoTaskService.DeleteTodoTaskAsync(userId, listId, taskId, cancellationToken);
+        return Ok();
     }
 
     [HttpPut("reorder")]
@@ -153,27 +80,7 @@ public class TodoTasksController : ControllerBase
         [FromBody] ReorderTodoTasksRequestContent request,
         CancellationToken cancellationToken = default)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-        }
-
-        try
-        {
-            var result = await _todoTaskService.ReorderTodoTasksAsync(userId, listId, request, cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
-        }
+        var result = await _todoTaskService.ReorderTodoTasksAsync(userId, listId, request, cancellationToken);
+        return Ok(result);
     }
 }

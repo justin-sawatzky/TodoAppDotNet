@@ -1,15 +1,19 @@
-using System.Collections.Concurrent;
 using TodoApp.Models;
 
 namespace TodoApp.Repositories;
 
 public class InMemoryTodoListRepository : ITodoListRepository
 {
-    private readonly ConcurrentDictionary<(string UserId, string ListId), TodoList> _lists = new();
+    private readonly InMemoryDataStore _store;
+
+    public InMemoryTodoListRepository(InMemoryDataStore store)
+    {
+        _store = store;
+    }
 
     public Task<(List<TodoList> lists, string? nextToken)> GetListsAsync(string userId, int maxResults, string? nextToken, CancellationToken cancellationToken)
     {
-        var allLists = _lists.Values
+        var allLists = _store.TodoLists.Values
             .Where(l => l.UserId == userId)
             .OrderBy(l => l.CreatedAt)
             .ToList();
@@ -29,25 +33,32 @@ public class InMemoryTodoListRepository : ITodoListRepository
 
     public Task<TodoList?> GetListByIdAsync(string userId, string listId, CancellationToken cancellationToken)
     {
-        _lists.TryGetValue((userId, listId), out var list);
+        _store.TodoLists.TryGetValue((userId, listId), out var list);
         return Task.FromResult(list);
     }
 
     public Task CreateListAsync(TodoList list, CancellationToken cancellationToken)
     {
-        _lists.TryAdd((list.UserId, list.ListId), list);
+        _store.TodoLists.TryAdd((list.UserId, list.ListId), list);
         return Task.CompletedTask;
     }
 
     public Task UpdateListAsync(TodoList list, CancellationToken cancellationToken)
     {
-        _lists.TryUpdate((list.UserId, list.ListId), list, _lists[(list.UserId, list.ListId)]);
+        if (_store.TodoLists.TryGetValue((list.UserId, list.ListId), out var existingList))
+        {
+            _store.TodoLists.TryUpdate((list.UserId, list.ListId), list, existingList);
+        }
         return Task.CompletedTask;
     }
 
     public Task DeleteListAsync(string userId, string listId, CancellationToken cancellationToken)
     {
-        _lists.TryRemove((userId, listId), out _);
+        if (_store.TodoLists.TryRemove((userId, listId), out _))
+        {
+            // Cascade delete all tasks for this list
+            _store.CascadeDeleteList(userId, listId);
+        }
         return Task.CompletedTask;
     }
 }

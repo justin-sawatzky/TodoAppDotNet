@@ -1,16 +1,20 @@
-using System.Collections.Concurrent;
 using TodoApp.Models;
 
 namespace TodoApp.Repositories;
 
 public class InMemoryTodoTaskRepository : ITodoTaskRepository
 {
-    private readonly ConcurrentDictionary<(string UserId, string ListId, string TaskId), TodoTask> _tasks = new();
+    private readonly InMemoryDataStore _store;
     private readonly object _orderLock = new();
+
+    public InMemoryTodoTaskRepository(InMemoryDataStore store)
+    {
+        _store = store;
+    }
 
     public Task<(List<TodoTask> tasks, string? nextToken)> GetTasksAsync(string userId, string listId, int maxResults, string? nextToken, bool? completed, CancellationToken cancellationToken)
     {
-        var query = _tasks.Values
+        var query = _store.TodoTasks.Values
             .Where(t => t.UserId == userId && t.ListId == listId);
 
         if (completed.HasValue)
@@ -35,7 +39,7 @@ public class InMemoryTodoTaskRepository : ITodoTaskRepository
 
     public Task<TodoTask?> GetTaskByIdAsync(string userId, string listId, string taskId, CancellationToken cancellationToken)
     {
-        _tasks.TryGetValue((userId, listId, taskId), out var task);
+        _store.TodoTasks.TryGetValue((userId, listId, taskId), out var task);
         return Task.FromResult(task);
     }
 
@@ -50,7 +54,7 @@ public class InMemoryTodoTaskRepository : ITodoTaskRepository
             }
             else
             {
-                var maxOrder = _tasks.Values
+                var maxOrder = _store.TodoTasks.Values
                     .Where(t => t.UserId == task.UserId && t.ListId == task.ListId)
                     .Select(t => (int?)t.Order)
                     .Max() ?? -1;
@@ -58,7 +62,7 @@ public class InMemoryTodoTaskRepository : ITodoTaskRepository
                 task.Order = maxOrder + 1;
             }
 
-            _tasks.TryAdd((task.UserId, task.ListId, task.TaskId), task);
+            _store.TodoTasks.TryAdd((task.UserId, task.ListId, task.TaskId), task);
         }
 
         return Task.CompletedTask;
@@ -66,13 +70,16 @@ public class InMemoryTodoTaskRepository : ITodoTaskRepository
 
     public Task UpdateTaskAsync(TodoTask task, CancellationToken cancellationToken)
     {
-        _tasks.TryUpdate((task.UserId, task.ListId, task.TaskId), task, _tasks[(task.UserId, task.ListId, task.TaskId)]);
+        if (_store.TodoTasks.TryGetValue((task.UserId, task.ListId, task.TaskId), out var existingTask))
+        {
+            _store.TodoTasks.TryUpdate((task.UserId, task.ListId, task.TaskId), task, existingTask);
+        }
         return Task.CompletedTask;
     }
 
     public Task DeleteTaskAsync(string userId, string listId, string taskId, CancellationToken cancellationToken)
     {
-        _tasks.TryRemove((userId, listId, taskId), out _);
+        _store.TodoTasks.TryRemove((userId, listId, taskId), out _);
         return Task.CompletedTask;
     }
 
@@ -82,7 +89,7 @@ public class InMemoryTodoTaskRepository : ITodoTaskRepository
         {
             foreach (var (taskId, newOrder) in taskOrders)
             {
-                if (_tasks.TryGetValue((userId, listId, taskId), out var task))
+                if (_store.TodoTasks.TryGetValue((userId, listId, taskId), out var task))
                 {
                     task.Order = newOrder;
                     task.UpdatedAt = DateTimeOffset.UtcNow;
@@ -90,7 +97,7 @@ public class InMemoryTodoTaskRepository : ITodoTaskRepository
             }
 
             // Return all tasks in the list ordered by new order
-            var tasks = _tasks.Values
+            var tasks = _store.TodoTasks.Values
                 .Where(t => t.UserId == userId && t.ListId == listId)
                 .OrderBy(t => t.Order)
                 .ThenBy(t => t.CreatedAt)

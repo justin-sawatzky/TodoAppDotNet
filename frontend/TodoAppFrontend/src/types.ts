@@ -1,26 +1,6 @@
-export interface User {
-  userId: string;
-  username: string;
-  email: string;
-  createdAt: number;
-}
+// Re-export types from generated schema to ensure they stay in sync with the API
+import type { components } from './api/schema';
 
-export interface TodoList {
-  userId: string;
-  listId: string;
-  name: string;
-  description?: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface TodoTask {
-  userId: string;
-  listId: string;
-  taskId: string;
-  description: string;
-  completed: boolean;
-  order: number;
-  createdAt: number;
-  updatedAt: number;
-}
+export type User = components['schemas']['UserOutput'];
+export type TodoList = components['schemas']['TodoListOutput'];
+export type TodoTask = components['schemas']['TodoTaskOutput'];

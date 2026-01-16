@@ -328,13 +328,14 @@ make run
 
 #### Frontend Can't Connect to Backend
 
-**Problem**: API calls fail with CORS or network errors
+**Problem**: API calls fail with network errors
 
 **Solution**:
 - Verify backend is running: `curl http://localhost:5247/users`
 - Check backend logs for errors
-- Ensure CORS is configured (already set up in Program.cs)
-- If using Docker, verify both containers are on the same network
+- In development, the Vite dev server proxies `/api` requests to the backend (configured in `vite.config.ts`)
+- If using Docker, both services run on the same network
+- If running the backend standalone without the Vite proxy, you may need to add CORS configuration to `Program.cs`
 
 #### Database Migration Issues
 
@@ -463,7 +464,6 @@ docker-compose ps
 │   ├── Services/                       # Business logic layer
 │   ├── Repositories/                   # Data access layer
 │   ├── Models/                         # Entity models
-│   ├── DTOs/                           # Data transfer objects
 │   ├── Data/                           # EF Core DbContext
 │   ├── Generated/                      # Auto-generated C# DTOs from OpenAPI
 │   ├── Program.cs                      # Application entry point

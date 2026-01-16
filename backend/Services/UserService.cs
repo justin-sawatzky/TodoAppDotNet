@@ -7,18 +7,24 @@ namespace TodoApp.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<UserService> _logger;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, ILogger<UserService> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
-    public async Task<ListUsersResponseContent> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken)
+    public async Task<ListUsersResponseContent> ListUsersAsync(int? maxResults, string? nextToken, CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Listing users with maxResults={MaxResults}, nextToken={NextToken}", maxResults, nextToken);
+
         var (users, nextPageToken) = await _userRepository.GetUsersAsync(
-            (int?)maxResults ?? 50,
+            maxResults ?? 50,
             nextToken,
             cancellationToken);
+
+        _logger.LogDebug("Found {Count} users", users.Count);
 
         return new ListUsersResponseContent
         {
@@ -29,6 +35,8 @@ public class UserService : IUserService
 
     public async Task<UserOutput> CreateUserAsync(CreateUserRequestContent request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Creating user with username={Username}", request.Username);
+
         // Validation
         if (string.IsNullOrWhiteSpace(request.Username))
         {
@@ -44,6 +52,7 @@ public class UserService : IUserService
         var existingUser = await _userRepository.GetUserByEmailAsync(request.Email, cancellationToken);
         if (existingUser != null)
         {
+            _logger.LogWarning("Attempted to create user with existing email");
             throw new InvalidOperationException("User with this email already exists");
         }
 
@@ -58,14 +67,19 @@ public class UserService : IUserService
 
         await _userRepository.CreateUserAsync(user, cancellationToken);
 
+        _logger.LogInformation("Created user with ID={UserId}", user.UserId);
+
         return MapToOutput(user);
     }
 
     public async Task<UserOutput> GetUserAsync(string userId, CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Getting user with ID={UserId}", userId);
+
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
         {
+            _logger.LogDebug("User not found with ID={UserId}", userId);
             throw new KeyNotFoundException($"User with ID {userId} not found");
         }
 
@@ -74,9 +88,12 @@ public class UserService : IUserService
 
     public async Task<UserOutput> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Getting user by email");
+
         var user = await _userRepository.GetUserByEmailAsync(email, cancellationToken);
         if (user == null)
         {
+            _logger.LogDebug("User not found by email");
             throw new KeyNotFoundException($"User with email {email} not found");
         }
 
@@ -85,6 +102,8 @@ public class UserService : IUserService
 
     public async Task<UserOutput> UpdateUserAsync(string userId, UpdateUserRequestContent request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Updating user with ID={UserId}", userId);
+
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
         {
@@ -97,6 +116,7 @@ public class UserService : IUserService
             var existingUser = await _userRepository.GetUserByEmailAsync(request.Email, cancellationToken);
             if (existingUser != null)
             {
+                _logger.LogWarning("Attempted to update user to existing email");
                 throw new InvalidOperationException("User with this email already exists");
             }
         }
@@ -114,11 +134,15 @@ public class UserService : IUserService
 
         await _userRepository.UpdateUserAsync(user, cancellationToken);
 
+        _logger.LogInformation("Updated user with ID={UserId}", userId);
+
         return MapToOutput(user);
     }
 
     public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Deleting user with ID={UserId}", userId);
+
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
         {
@@ -126,6 +150,8 @@ public class UserService : IUserService
         }
 
         await _userRepository.DeleteUserAsync(userId, cancellationToken);
+
+        _logger.LogInformation("Deleted user with ID={UserId}", userId);
     }
 
     // Mapping methods

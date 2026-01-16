@@ -4,6 +4,8 @@ import type { User, TodoList, TodoTask } from '../types';
 import { useApiError } from '../hooks/useApiError';
 import { ErrorDisplay } from './ErrorDisplay';
 import { TaskList } from './TaskList';
+import { ConfirmModal } from './ConfirmModal';
+import type { ParsedError } from '../utils/errorHandling';
 import './TodoListView.css';
 
 interface TodoListViewProps {
@@ -24,20 +26,13 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const [loading, setLoading] = useState(false);
   const [loadingLists, setLoadingLists] = useState(true);
   const [loadingTasks, setLoadingTasks] = useState(false);
+  const [deleteListId, setDeleteListId] = useState<string | null>(null);
   const { error, handleApiCall, clearError, handleError } = useApiError();
 
   // Helper function to handle user invalidation
   const handleUserInvalidation = useCallback(
-    (error: unknown) => {
-      if (
-        error &&
-        typeof error === 'object' &&
-        ('type' in error
-          ? error.type === 'not_found'
-          : 'response' in error && typeof error.response === 'object' && error.response !== null
-            ? 'status' in error.response && error.response.status === 404
-            : 'status' in error && error.status === 404)
-      ) {
+    (error: ParsedError | null) => {
+      if (error?.type === 'not_found') {
         setTimeout(() => {
           onUserInvalidated();
         }, 2000);
@@ -49,16 +44,16 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   );
 
   useEffect(() => {
-    let isMounted = true;
+    const abortController = new AbortController();
 
     const loadLists = async () => {
       setLoadingLists(true);
       const { data, error: apiError } = await handleApiCall(
-        () => api.lists.list(user.userId),
+        () => api.lists.list(user.userId, abortController.signal),
         'load lists'
       );
 
-      if (!isMounted) return;
+      if (abortController.signal.aborted) return;
 
       if (apiError) {
         handleUserInvalidation(apiError);
@@ -75,23 +70,23 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     loadLists();
 
     return () => {
-      isMounted = false;
+      abortController.abort();
     };
   }, [user.userId, handleApiCall, handleUserInvalidation]);
 
   useEffect(() => {
     if (!selectedList) return;
 
-    let isMounted = true;
+    const abortController = new AbortController();
 
     const loadTasks = async () => {
       setLoadingTasks(true);
       const { data, error: apiError } = await handleApiCall(
-        () => api.tasks.list(user.userId, selectedList.listId),
+        () => api.tasks.list(user.userId, selectedList.listId, undefined, abortController.signal),
         'load tasks'
       );
 
-      if (!isMounted) return;
+      if (abortController.signal.aborted) return;
 
       if (apiError) {
         handleUserInvalidation(apiError);
@@ -108,7 +103,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     loadTasks();
 
     return () => {
-      isMounted = false;
+      abortController.abort();
     };
   }, [selectedList, user.userId, handleApiCall, handleUserInvalidation]);
 
@@ -188,8 +183,6 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   };
 
   const handleDeleteList = async (listId: string) => {
-    if (!confirm('Are you sure you want to delete this list?')) return;
-
     const { error: apiError } = await handleApiCall(
       () => api.lists.delete(user.userId, listId),
       'delete list'
@@ -204,6 +197,13 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
       setTasks([]);
     }
     await loadListsAfterUpdate();
+    setDeleteListId(null);
+  };
+
+  const handleConfirmDeleteList = () => {
+    if (deleteListId) {
+      handleDeleteList(deleteListId);
+    }
   };
 
   const handleStartEditList = (list: TodoList) => {
@@ -339,7 +339,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
                     {list.name}
                   </button>
                   <button
-                    onClick={() => handleDeleteList(list.listId)}
+                    onClick={() => setDeleteListId(list.listId)}
                     className="btn-delete"
                     title="Delete list"
                   >
@@ -380,6 +380,17 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
           )}
         </main>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteListId !== null}
+        title="Delete List"
+        message="Are you sure you want to delete this list? All tasks in this list will also be deleted."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        onConfirm={handleConfirmDeleteList}
+        onCancel={() => setDeleteListId(null)}
+      />
     </div>
   );
 }
