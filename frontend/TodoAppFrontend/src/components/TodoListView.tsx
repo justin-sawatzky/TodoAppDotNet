@@ -149,8 +149,11 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const trimmedName = newListName.trim();
+    const trimmedDescription = newListDescription.trim();
+
     // Validate list name
-    if (!newListName.trim()) {
+    if (!trimmedName) {
       if (newListName.length > 0) {
         // Has content but only whitespace
         handleError({ message: 'List name cannot be empty or contain only spaces' }, 'create list');
@@ -161,7 +164,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     setLoading(true);
 
     const { data, error: apiError } = await handleApiCall(
-      () => api.lists.create(user.userId, newListName, newListDescription.trim() || undefined),
+      () => api.lists.create(user.userId, trimmedName, trimmedDescription || undefined),
       'create list'
     );
 

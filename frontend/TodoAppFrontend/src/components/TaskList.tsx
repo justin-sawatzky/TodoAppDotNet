@@ -41,7 +41,7 @@ export function TaskList({
   const [editingDescription, setEditingDescription] = useState('');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [orderedTasks, setOrderedTasks] = useState<TodoTask[]>(tasks);
-  const { error, handleApiCall, clearError } = useApiError();
+  const { error, handleApiCall, clearError, handleError } = useApiError();
 
   // Update ordered tasks when tasks prop changes
   useEffect(() => {
@@ -51,21 +51,19 @@ export function TaskList({
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const trimmedDescription = newTaskDescription.trim();
+
     // Validate task description
-    if (!newTaskDescription.trim()) {
+    if (!trimmedDescription) {
       if (newTaskDescription.length > 0) {
         // Has content but only whitespace
-        handleApiCall(
-          () =>
-            Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
-          'create task'
-        );
+        handleError({ message: 'Task description cannot be empty or contain only spaces' }, 'create task');
       }
       return;
     }
 
     const { error: apiError } = await handleApiCall(
-      () => api.tasks.create(user.userId, list.listId, newTaskDescription),
+      () => api.tasks.create(user.userId, list.listId, trimmedDescription),
       'create task'
     );
 
