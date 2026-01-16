@@ -1,256 +1,442 @@
 # TodoAppDotNet
 
-A full-stack Todo application with a .NET backend and React TypeScript frontend, using Smithy for API modeling and OpenAPI for code generation.
+A modern full-stack Todo application demonstrating API-first development with Smithy modeling, .NET backend, and React TypeScript frontend. The project showcases clean architecture principles, type-safe API contracts, and automated code generation from a single source of truth.
 
-## Architecture
+## What is This Project?
 
-### Backend (.NET 10 + SQLite)
-- **API Modeling**: Smithy → OpenAPI specification
-- **Database**: SQLite with Entity Framework Core
-- **Architecture**: Clean architecture with Controllers, Services, Repositories
-- **API**: RESTful JSON API with full CRUD operations
+TodoAppDotNet is a production-ready task management application that allows users to create accounts, manage multiple todo lists, and organize tasks with full CRUD operations. The application uses Smithy for API modeling, which generates OpenAPI specifications that drive both backend DTOs and frontend TypeScript types, ensuring end-to-end type safety and contract consistency.
 
-### Frontend (React + TypeScript)
-- **Client Generation**: TypeScript types generated from OpenAPI spec
-- **Type Safety**: Fully typed API client using openapi-fetch
-- **Features**: Login, list management, task management with drag-and-drop
+Key architectural highlights:
+- **API-First Design**: Smithy models define the API contract, generating OpenAPI specs
+- **Type Safety**: Fully typed from database to UI with generated code
+- **Clean Architecture**: Separation of concerns with Controllers, Services, and Repositories
+- **Modern Stack**: .NET 9, React 19, TypeScript, and SQLite
+
+## Technical Requirements
+
+### macOS / Linux
+
+**Required (for Docker-based setup - recommended):**
+- **Docker Desktop** 20.10+ or **Docker Engine** 20.10+ - [Install Docker](https://docs.docker.com/get-docker/)
+- **Docker Compose** 2.0+ - [Install Docker Compose](https://docs.docker.com/compose/install/) (included with Docker Desktop)
+- **Git** - [Install Git](https://git-scm.com/downloads)
+
+**Required (for local development without Docker):**
+- **.NET SDK** 9.0 or later - [Install .NET](https://dotnet.microsoft.com/download)
+- **Node.js** 22.x (LTS) or later - [Install Node.js](https://nodejs.org/)
+- **npm** 10.x or later (comes with Node.js)
+- **Smithy CLI** - [Install Smithy](https://smithy.io/2.0/guides/smithy-cli/cli_installation.html) (required for API code generation)
+- **Git** - [Install Git](https://git-scm.com/downloads)
+
+**Optional tools:**
+- **Make**: GNU Make (pre-installed on most systems) - for convenient Makefile commands
+- **mise**: For managing Node.js versions - [Install mise](https://mise.jdx.dev/getting-started.html) (configured in `.mise.toml`)
+
+### Windows
+
+**Required (for Docker-based setup - recommended):**
+- **Docker Desktop** 20.10+ with WSL2 backend - [Install Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+- **Docker Compose** 2.0+ - [Install Docker Compose](https://docs.docker.com/compose/install/) (included with Docker Desktop)
+- **WSL2** (Windows Subsystem for Linux) - [Install WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) (required for Docker Desktop)
+- **Git** for Windows 2.30+ - [Install Git](https://git-scm.com/download/win)
+
+**Required (for local development without Docker):**
+- **.NET SDK** 9.0 or later - [Install .NET](https://dotnet.microsoft.com/download)
+- **Node.js** 22.x (LTS) or later - [Install Node.js](https://nodejs.org/)
+- **npm** 10.x or later (comes with Node.js)
+- **Smithy CLI** - [Install Smithy](https://smithy.io/2.0/guides/smithy-cli/cli_installation.html) (required for API code generation)
+- **Git** for Windows 2.30+ - [Install Git](https://git-scm.com/download/win)
+
+**Optional tools:**
+- **PowerShell** 7+ or Windows Terminal - [Install PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows)
+- **Make for Windows**: GNU Make via [Chocolatey](https://chocolatey.org/), [Scoop](https://scoop.sh/), or WSL2
+
+**Note for Windows users:** You can run all commands using PowerShell or Command Prompt. For Makefile commands, either install GNU Make for Windows or use the underlying commands directly (shown in each section).
+
+## Building and Running from Scratch
+
+### Option 1: Docker (Recommended - Works on All Platforms)
+
+This is the fastest way to get started and requires minimal setup.
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd TodoAppDotNet
+```
+
+2. **Start the application**
+```bash
+# Using Docker Compose (recommended)
+docker-compose up --build
+
+# Or using Make (macOS/Linux/WSL2)
+make run
+```
+
+3. **Access the application**
+- Frontend: http://localhost:80
+- Backend API: http://localhost:5247
+
+4. **Stop the application**
+```bash
+# Stop containers
+docker-compose down
+
+# Or using Make
+make stop
+```
+
+### Option 2: Local Development (Without Docker)
+
+This approach gives you more control and faster iteration during development.
+
+#### Step 1: Install Prerequisites
+
+**macOS/Linux:**
+```bash
+# Install .NET SDK (if not already installed)
+# Visit: https://dotnet.microsoft.com/download
+
+# Install Node.js (if not already installed)
+# Visit: https://nodejs.org/ or use mise:
+mise install
+
+# Verify installations
+dotnet --version  # Should show 9.0.x or later
+node --version    # Should show v22.x or later
+npm --version     # Should show 10.x or later
+```
+
+**Windows:**
+```powershell
+# Install .NET SDK
+# Download from: https://dotnet.microsoft.com/download
+
+# Install Node.js
+# Download from: https://nodejs.org/
+
+# Verify installations
+dotnet --version  # Should show 9.0.x or later
+node --version    # Should show v22.x or later
+npm --version     # Should show 10.x or later
+```
+
+#### Step 2: Build the Backend
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Restore .NET dependencies
+dotnet restore
+
+# Build the project
+dotnet build
+
+# Initialize the database (creates SQLite database)
+dotnet ef database update
+# Or simply run the app - it will create the database automatically
+```
+
+#### Step 3: Build the Frontend
+
+```bash
+# Navigate to frontend directory
+cd frontend/TodoAppFrontend
+
+# Install npm dependencies
+npm install
+
+# Build the frontend (optional - for production)
+npm run build
+```
+
+#### Step 4: Run the Application
+
+You'll need two terminal windows/tabs:
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+dotnet run --urls "http://localhost:5247"
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend/TodoAppFrontend
+npm run dev
+```
+
+**Access the application:**
+- Frontend: http://localhost:5173 (Vite dev server)
+- Backend API: http://localhost:5247
+
+### Option 3: Using Makefile Commands (macOS/Linux/WSL2)
+
+The Makefile provides convenient shortcuts for common tasks:
+
+```bash
+# View all available commands
+make help
+
+# Start with Docker Compose
+make run
+
+# View logs
+make logs
+
+# Stop containers
+make stop
+
+# Build Smithy models and generate code
+make generate-all
+
+# Format code
+make format
+
+# Lint code
+make lint
+
+# Clean up Docker resources
+make clean
+```
+
+## API Development Workflow
+
+When you need to modify the API contract:
+
+1. **Edit Smithy models** in `model/` directory
+2. **Generate OpenAPI spec**:
+```bash
+make generate-openapi
+# Or manually: smithy build
+```
+
+3. **Generate TypeScript types** for frontend:
+```bash
+make generate-frontend-types
+# Or manually: cd frontend/TodoAppFrontend && npm run generate-api
+```
+
+4. **Generate C# DTOs** for backend:
+```bash
+make generate-backend-types
+```
+
+5. **Implement changes** in backend controllers and frontend components
+
+## Debugging and Troubleshooting
+
+### Common Issues and Solutions
+
+#### Port Already in Use
+
+**Problem**: Error message like "Address already in use" or "Port 5247/80 is already allocated"
+
+**Solution**:
+```bash
+# Find and kill process using the port (macOS/Linux)
+lsof -ti:5247 | xargs kill -9
+lsof -ti:80 | xargs kill -9
+
+# Windows (PowerShell)
+Get-Process -Id (Get-NetTCPConnection -LocalPort 5247).OwningProcess | Stop-Process
+Get-Process -Id (Get-NetTCPConnection -LocalPort 80).OwningProcess | Stop-Process
+
+# Or change ports in docker-compose.yml or when running locally
+```
+
+#### Docker Build Fails
+
+**Problem**: Docker build fails with network or dependency errors
+
+**Solution**:
+```bash
+# Clear Docker cache and rebuild
+docker-compose down --volumes
+docker system prune -f
+docker-compose up --build --force-recreate
+
+# Or using Make
+make clean
+make run
+```
+
+#### Frontend Can't Connect to Backend
+
+**Problem**: API calls fail with CORS or network errors
+
+**Solution**:
+- Verify backend is running: `curl http://localhost:5247/users`
+- Check backend logs for errors
+- Ensure CORS is configured (already set up in Program.cs)
+- If using Docker, verify both containers are on the same network
+
+#### Database Migration Issues
+
+**Problem**: Entity Framework migrations fail or database is out of sync
+
+**Solution**:
+```bash
+cd backend
+
+# Delete existing database
+rm todoapp.db
+
+# Recreate database
+dotnet ef database update
+
+# Or let the app create it automatically on startup
+dotnet run
+```
+
+#### npm Install Fails
+
+**Problem**: Frontend dependencies fail to install
+
+**Solution**:
+```bash
+cd frontend/TodoAppFrontend
+
+# Clear npm cache
+npm cache clean --force
+
+# Delete node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+
+# Reinstall
+npm install
+```
+
+#### Smithy Build Fails
+
+**Problem**: Smithy model validation or build errors
+
+**Solution**:
+```bash
+# Validate Smithy model
+make smithy-validate
+
+# Check for syntax errors in model/*.smithy files
+# Ensure all required dependencies are installed
+npm install -g @smithy/cli
+
+# Clean and rebuild
+make smithy-clean
+make smithy-build
+```
+
+#### Code Generation Issues
+
+**Problem**: Generated TypeScript types or C# DTOs are outdated or missing
+
+**Solution**:
+```bash
+# Regenerate all code from Smithy models
+make generate-all
+
+# Or step by step:
+make generate-openapi
+make generate-frontend-types
+make generate-backend-types
+```
+
+### Viewing Logs
+
+**Docker logs:**
+```bash
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Or using Make
+make logs
+```
+
+**Local development:**
+- Backend logs appear in the terminal where you ran `dotnet run`
+- Frontend logs appear in the terminal where you ran `npm run dev`
+- Browser console (F12) shows frontend runtime errors
+
+### Debugging in IDE
+
+**Backend (Visual Studio / VS Code / Rider):**
+- Open `backend/TodoAppDotNet.csproj`
+- Set breakpoints in Controllers, Services, or Repositories
+- Press F5 to start debugging
+- Backend will run on http://localhost:5247
+
+**Frontend (VS Code / WebStorm):**
+- Open `frontend/TodoAppFrontend` folder
+- Use browser DevTools (F12) for debugging
+- React DevTools extension recommended
+- Set breakpoints in browser Sources tab
+
+### Health Checks
+
+Verify services are running correctly:
+
+```bash
+# Backend health check
+curl http://localhost:5247/users
+
+# Frontend (should return HTML)
+curl http://localhost:80
+
+# Docker container status
+docker-compose ps
+```
 
 ## Project Structure
 
 ```
 .
-├── backend/
-│   ├── model/              # Smithy API models
-│   ├── Controllers/        # API controllers
-│   ├── Services/           # Business logic
-│   ├── Repositories/       # Data access layer
-│   ├── Models/             # Entity models
-│   ├── DTOs/               # Data transfer objects
-│   ├── Data/               # EF Core DbContext
-│   └── build/              # Generated OpenAPI spec
+├── backend/                    # .NET backend application
+│   ├── Controllers/           # API controllers
+│   ├── Services/              # Business logic layer
+│   ├── Repositories/          # Data access layer
+│   ├── Models/                # Entity models
+│   ├── DTOs/                  # Data transfer objects
+│   ├── Data/                  # EF Core DbContext
+│   ├── Generated/             # Auto-generated C# DTOs from OpenAPI
+│   ├── Program.cs             # Application entry point
+│   └── TodoAppDotNet.csproj   # Project file
 ├── frontend/
-│   └── TodoAppFrontend/
+│   └── TodoAppFrontend/       # React TypeScript frontend
 │       ├── src/
-│       │   ├── api/        # Generated API client
-│       │   ├── components/ # React components
-│       │   └── types.ts    # TypeScript types
+│       │   ├── api/           # Generated TypeScript API client
+│       │   ├── components/    # React components
+│       │   └── types.ts       # TypeScript types
 │       └── package.json
-└── dotnet-tools.json       # Local .NET tools
-
+├── model/                      # Smithy API models
+│   ├── main.smithy            # Main service definition
+│   └── resources/             # Resource definitions
+├── build/                      # Generated OpenAPI specs
+├── docker-compose.yml          # Multi-container orchestration
+├── Makefile                    # Build and development commands
+└── README.md                   # This file
 ```
-
-## Getting Started
-
-### Prerequisites
-
-- .NET 10 SDK (for local development)
-- Node.js 18+ (for local development)
-- Docker (for containerized deployment)
-
-### Quick Start with Docker 🐳 (Recommended)
-
-**Option 1: Docker Compose (Multi-container)**
-```bash
-# Start both frontend and backend
-docker-compose up --build
-
-# Access the app
-# Frontend: http://localhost:80
-# Backend API: http://localhost:5247
-```
-
-**Option 2: Combined Container (Single container)**
-```bash
-# Build and run combined container
-docker build -t todoapp .
-docker run -p 80:80 -p 5247:5247 todoapp
-
-# Access at http://localhost:80
-```
-
-**Option 3: Using Makefile**
-```bash
-make help          # Show all available commands
-make run           # Start with docker-compose
-make logs          # View logs
-make stop          # Stop containers
-```
-
-### Local Development (Without Docker)
-
-**Option 1: Two Terminals (Recommended)**
-
-Terminal 1 - Start Backend:
-```bash
-cd backend
-dotnet run --urls "http://localhost:5247"
-```
-
-Terminal 2 - Start Frontend:
-```bash
-cd frontend/TodoAppFrontend
-npm run dev
-```
-
-**Option 2: Using Scripts**
-```bash
-./start-backend.sh    # Terminal 1
-./start-frontend.sh   # Terminal 2
-./stop-dev.sh         # Stop all servers
-```
-
-Then open http://localhost:5173 in your browser!
-
-## Deployment Options
-
-### 🐳 Docker (Recommended for Production)
-
-**Multi-container with Docker Compose:**
-```bash
-docker-compose up -d --build
-```
-
-**Single combined container:**
-```bash
-docker build -t todoapp .
-docker run -d -p 80:80 -p 5247:5247 todoapp
-```
-
-**Individual containers:**
-```bash
-# Backend
-docker build -t todoapp-backend ./backend
-docker run -d -p 5247:5247 todoapp-backend
-
-# Frontend
-docker build -t todoapp-frontend ./frontend/TodoAppFrontend
-docker run -d -p 80:80 todoapp-frontend
-```
-
-See [DOCKER_SETUP.md](DOCKER_SETUP.md) for detailed Docker documentation.
-
-### 📦 Local Development Setup
-
-1. **Backend Setup:**
-```bash
-cd backend
-dotnet restore
-dotnet tool run dotnet-ef database update
-dotnet run --urls "http://localhost:5247"
-```
-
-2. **Frontend Setup:**
-```bash
-cd frontend/TodoAppFrontend
-npm install
-npm run dev
-```
-
-## API Development Workflow
-
-### Modifying the API
-
-1. **Update Smithy Models** in `model/`
-2. **Build Smithy** to generate OpenAPI:
-```bash
-cd backend
-dotnet tool run smithy-cli build
-```
-
-3. **Regenerate Frontend Client**:
-```bash
-cd frontend/TodoAppFrontend
-npm run generate-api
-```
-
-4. **Implement Backend Controllers** in `backend/Controllers/`
-5. **Update Frontend Components** to use new API endpoints
 
 ## Features
 
-### User Management
-- Create user accounts with email and username
-- Login with email
-- User data persistence
-
-### Todo Lists
-- Create multiple todo lists per user
-- View all lists in sidebar
-- Delete lists (cascades to tasks)
-
-### Tasks
-- Add tasks to lists
+- User account creation and authentication
+- Multiple todo lists per user
+- Task management with CRUD operations
 - Mark tasks as complete/incomplete
-- Edit task descriptions inline
-- Delete individual tasks
-- Drag and drop to reorder tasks
-- Filter by completion status
-
-## API Endpoints
-
-### Users
-- `GET /users` - List all users
-- `POST /users` - Create a new user
-- `GET /users/{userId}` - Get user by ID
-- `PUT /users/{userId}` - Update user
-- `DELETE /users/{userId}` - Delete user
-
-### Todo Lists
-- `GET /users/{userId}/lists` - List user's todo lists
-- `POST /users/{userId}/lists` - Create a new list
-- `GET /users/{userId}/lists/{listId}` - Get list by ID
-- `PUT /users/{userId}/lists/{listId}` - Update list
-- `DELETE /users/{userId}/lists/{listId}` - Delete list
-
-### Tasks
-- `GET /users/{userId}/lists/{listId}/tasks` - List tasks in a list
-- `POST /users/{userId}/lists/{listId}/tasks` - Create a new task
-- `GET /users/{userId}/lists/{listId}/tasks/{taskId}` - Get task by ID
-- `PUT /users/{userId}/lists/{listId}/tasks/{taskId}` - Update task
-- `DELETE /users/{userId}/lists/{listId}/tasks/{taskId}` - Delete task
+- Drag-and-drop task reordering
+- Filter tasks by completion status
+- RESTful API with OpenAPI documentation
 
 ## Technologies
 
-### Backend
-- .NET 10
-- Entity Framework Core
-- SQLite
-- Smithy (API modeling)
-- OpenAPI 3.1
-
-### Frontend
-- React 19
-- TypeScript
-- Vite
-- openapi-fetch (type-safe API client)
-- openapi-typescript (code generation)
-
-## Database Schema
-
-### Users
-- `UserId` (PK)
-- `Username`
-- `Email` (unique)
-- `CreatedAt`
-
-### TodoLists
-- `UserId` (PK, FK)
-- `ListId` (PK)
-- `Name`
-- `Description`
-- `CreatedAt`
-- `UpdatedAt`
-
-### TodoTasks
-- `UserId` (PK, FK)
-- `ListId` (PK, FK)
-- `TaskId` (PK)
-- `Description`
-- `Completed`
-- `CreatedAt`
-- `UpdatedAt`
+**Backend**: .NET 9, Entity Framework Core, SQLite, Smithy, OpenAPI 3.1  
+**Frontend**: React 19, TypeScript, Vite, openapi-fetch, openapi-typescript  
+**DevOps**: Docker, Docker Compose, Make
 
 ## License
 
 MIT
-A full stack TODO application written in .NET Core and React
