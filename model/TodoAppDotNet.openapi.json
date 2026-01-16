@@ -1,0 +1,1852 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "TodoApp API",
+        "version": "1.0.0",
+        "description": "A REST API for managing TODO lists and tasks"
+    },
+    "paths": {
+        "/users": {
+            "get": {
+                "description": "List all users",
+                "operationId": "ListUsers",
+                "parameters": [
+                    {
+                        "name": "maxResults",
+                        "in": "query",
+                        "description": "Pagination max results constraint",
+                        "schema": {
+                            "type": "number",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Pagination max results constraint"
+                        }
+                    },
+                    {
+                        "name": "nextToken",
+                        "in": "query",
+                        "description": "Pagination token constraint",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1000,
+                            "minLength": 1,
+                            "description": "Pagination token constraint"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ListUsers 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListUsersResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new user",
+                "operationId": "CreateUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUserRequestContent"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "CreateUser 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateUserResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "ConflictException 409 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConflictExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/lookup": {
+            "get": {
+                "description": "Get a user by their email address",
+                "operationId": "GetUserByEmail",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Email with validation constraints",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 254,
+                            "minLength": 5,
+                            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                            "description": "Email with validation constraints"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetUserByEmail 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetUserByEmailResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}": {
+            "delete": {
+                "description": "Delete a user",
+                "operationId": "DeleteUser",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "DeleteUser 200 response"
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "description": "Get a user by ID",
+                "operationId": "GetUser",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetUser 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetUserResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a user",
+                "operationId": "UpdateUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserRequestContent"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UpdateUser 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateUserResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/lists": {
+            "get": {
+                "operationId": "ListTodoLists",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "maxResults",
+                        "in": "query",
+                        "description": "Pagination max results constraint",
+                        "schema": {
+                            "type": "number",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Pagination max results constraint"
+                        }
+                    },
+                    {
+                        "name": "nextToken",
+                        "in": "query",
+                        "description": "Pagination token constraint",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1000,
+                            "minLength": 1,
+                            "description": "Pagination token constraint"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ListTodoLists 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListTodoListsResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "TodoList operations",
+                "operationId": "CreateTodoList",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTodoListRequestContent"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CreateTodoList 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateTodoListResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/lists/{listId}": {
+            "delete": {
+                "operationId": "DeleteTodoList",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "DeleteTodoList 200 response"
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "operationId": "GetTodoList",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetTodoList 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetTodoListResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "UpdateTodoList",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTodoListRequestContent"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UpdateTodoList 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateTodoListResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/lists/{listId}/tasks": {
+            "get": {
+                "operationId": "ListTodoTasks",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "maxResults",
+                        "in": "query",
+                        "description": "Pagination max results constraint",
+                        "schema": {
+                            "type": "number",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Pagination max results constraint"
+                        }
+                    },
+                    {
+                        "name": "nextToken",
+                        "in": "query",
+                        "description": "Pagination token constraint",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1000,
+                            "minLength": 1,
+                            "description": "Pagination token constraint"
+                        }
+                    },
+                    {
+                        "name": "completed",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ListTodoTasks 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListTodoTasksResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "TodoTask operations",
+                "operationId": "CreateTodoTask",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTodoTaskRequestContent"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CreateTodoTask 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateTodoTaskResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/lists/{listId}/tasks/reorder": {
+            "put": {
+                "description": "Batch reorder tasks within a list",
+                "operationId": "ReorderTodoTasks",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderTodoTasksRequestContent"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ReorderTodoTasks 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReorderTodoTasksResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/lists/{listId}/tasks/{taskId}": {
+            "delete": {
+                "operationId": "DeleteTodoTask",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "DeleteTodoTask 200 response"
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "operationId": "GetTodoTask",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetTodoTask 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetTodoTaskResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "UpdateTodoTask",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTodoTaskRequestContent"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User identifier",
+                        "schema": {
+                            "type": "string",
+                            "description": "User identifier"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "listId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "description": "Identifiers",
+                        "schema": {
+                            "type": "string",
+                            "description": "Identifiers"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UpdateTodoTask 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateTodoTaskResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ValidationException 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationExceptionResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ResourceNotFoundException 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ConflictExceptionResponseContent": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "message"
+                ]
+            },
+            "CreateTodoListRequestContent": {
+                "type": "object",
+                "description": "TodoList structures",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "description": "List name with validation constraints"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 0,
+                        "description": "List description with validation constraints"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "CreateTodoListResponseContent": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "description": "List name with validation constraints"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 0,
+                        "description": "List description with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "listId",
+                    "name",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "CreateTodoTaskRequestContent": {
+                "type": "object",
+                "description": "TodoTask structures",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Task description with validation constraints"
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    }
+                },
+                "required": [
+                    "description"
+                ]
+            },
+            "CreateTodoTaskResponseContent": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "taskId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Task description with validation constraints"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "completed",
+                    "createdAt",
+                    "description",
+                    "listId",
+                    "taskId",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "CreateUserRequestContent": {
+                "type": "object",
+                "description": "Structure for creating a new user",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    }
+                },
+                "required": [
+                    "email",
+                    "username"
+                ]
+            },
+            "CreateUserResponseContent": {
+                "type": "object",
+                "description": "Structure for user response",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "email",
+                    "userId",
+                    "username"
+                ]
+            },
+            "GetTodoListResponseContent": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "description": "List name with validation constraints"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 0,
+                        "description": "List description with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "listId",
+                    "name",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "GetTodoTaskResponseContent": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "taskId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Task description with validation constraints"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "completed",
+                    "createdAt",
+                    "description",
+                    "listId",
+                    "taskId",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "GetUserByEmailResponseContent": {
+                "type": "object",
+                "description": "Structure for user response",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "email",
+                    "userId",
+                    "username"
+                ]
+            },
+            "GetUserResponseContent": {
+                "type": "object",
+                "description": "Structure for user response",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "email",
+                    "userId",
+                    "username"
+                ]
+            },
+            "ListTodoListsResponseContent": {
+                "type": "object",
+                "properties": {
+                    "lists": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TodoListOutput"
+                        }
+                    },
+                    "nextToken": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Pagination token constraint"
+                    }
+                },
+                "required": [
+                    "lists"
+                ]
+            },
+            "ListTodoTasksResponseContent": {
+                "type": "object",
+                "properties": {
+                    "tasks": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TodoTaskOutput"
+                        }
+                    },
+                    "nextToken": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Pagination token constraint"
+                    }
+                },
+                "required": [
+                    "tasks"
+                ]
+            },
+            "ListUsersResponseContent": {
+                "type": "object",
+                "properties": {
+                    "users": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UserOutput"
+                        }
+                    },
+                    "nextToken": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Pagination token constraint"
+                    }
+                },
+                "required": [
+                    "users"
+                ]
+            },
+            "ReorderTodoTasksRequestContent": {
+                "type": "object",
+                "description": "Input for batch reorder operation",
+                "properties": {
+                    "taskOrders": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TaskOrderEntry"
+                        },
+                        "description": "List of task order entries"
+                    }
+                },
+                "required": [
+                    "taskOrders"
+                ]
+            },
+            "ReorderTodoTasksResponseContent": {
+                "type": "object",
+                "description": "Output for batch reorder operation",
+                "properties": {
+                    "tasks": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TodoTaskOutput"
+                        }
+                    }
+                },
+                "required": [
+                    "tasks"
+                ]
+            },
+            "ResourceNotFoundExceptionResponseContent": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "message"
+                ]
+            },
+            "TaskOrderEntry": {
+                "type": "object",
+                "description": "Task order entry for batch reorder",
+                "properties": {
+                    "taskId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    }
+                },
+                "required": [
+                    "order",
+                    "taskId"
+                ]
+            },
+            "TodoListOutput": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "description": "List name with validation constraints"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 0,
+                        "description": "List description with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "listId",
+                    "name",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "TodoTaskOutput": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "taskId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Task description with validation constraints"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "completed",
+                    "createdAt",
+                    "description",
+                    "listId",
+                    "taskId",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "UpdateTodoListRequestContent": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "description": "List name with validation constraints"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 0,
+                        "description": "List description with validation constraints"
+                    }
+                }
+            },
+            "UpdateTodoListResponseContent": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "description": "List name with validation constraints"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 0,
+                        "description": "List description with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "listId",
+                    "name",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "UpdateTodoTaskRequestContent": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Task description with validation constraints"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    }
+                }
+            },
+            "UpdateTodoTaskResponseContent": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "listId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "taskId": {
+                        "type": "string",
+                        "description": "Identifiers"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "description": "Task description with validation constraints"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "order": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0,
+                        "description": "Task order with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "updatedAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "completed",
+                    "createdAt",
+                    "description",
+                    "listId",
+                    "taskId",
+                    "updatedAt",
+                    "userId"
+                ]
+            },
+            "UpdateUserRequestContent": {
+                "type": "object",
+                "description": "Structure for updating a user",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    }
+                }
+            },
+            "UpdateUserResponseContent": {
+                "type": "object",
+                "description": "Structure for user response",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "email",
+                    "userId",
+                    "username"
+                ]
+            },
+            "UserOutput": {
+                "type": "object",
+                "description": "Structure for user response",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User identifier"
+                    },
+                    "username": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "pattern": "^[a-zA-Z0-9_-]+$",
+                        "description": "Username with validation constraints"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "minLength": 5,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                        "description": "Email with validation constraints"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "createdAt",
+                    "email",
+                    "userId",
+                    "username"
+                ]
+            },
+            "ValidationExceptionResponseContent": {
+                "type": "object",
+                "description": "Common error structures",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "message"
+                ]
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:80",
+            "description": "Development server"
+        }
+    ]
+}
