@@ -91,6 +91,16 @@ public class UserService : IUserService
             throw new KeyNotFoundException($"User with ID {userId} not found");
         }
 
+        // Check for email conflict if email is being updated
+        if (!string.IsNullOrWhiteSpace(request.Email) && request.Email != user.Email)
+        {
+            var existingUser = await _userRepository.GetUserByEmailAsync(request.Email, cancellationToken);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("User with this email already exists");
+            }
+        }
+
         // Update fields if provided
         if (!string.IsNullOrWhiteSpace(request.Username))
         {

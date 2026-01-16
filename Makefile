@@ -1,6 +1,6 @@
 # TodoApp Docker Makefile
 
-.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all format format-frontend format-backend lint lint-frontend lint-backend
+.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all format format-frontend format-backend lint lint-frontend lint-backend test-api test-api-ts test-api-bash test-api-powershell test-api-install
 
 help: ## Show this help message
 	@echo "TodoApp Docker Commands:"
@@ -124,3 +124,25 @@ dev-shell-backend: ## Access backend container shell
 
 dev-shell-frontend: ## Access frontend container shell
 	docker exec -it todoapp-frontend /bin/sh
+
+# API Testing Commands
+API_BASE_URL ?= http://localhost:5247
+
+test-api: test-api-ts ## Run API tests (uses TypeScript by default)
+
+test-api-install: ## Install API test dependencies
+	@echo "Installing API test dependencies..."
+	cd tests && npm install
+	@echo "✅ API test dependencies installed"
+
+test-api-ts: ## Run API tests using TypeScript (cross-platform, requires Node.js 18+)
+	@echo "Running API tests with TypeScript..."
+	@cd tests && npx tsx api_test.ts --base-url $(API_BASE_URL)
+
+test-api-bash: ## Run API tests using Bash/curl (macOS/Linux/Git Bash)
+	@echo "Running API tests with Bash..."
+	@bash tests/api_test.sh $(API_BASE_URL)
+
+test-api-powershell: ## Run API tests using PowerShell (Windows/PowerShell Core)
+	@echo "Running API tests with PowerShell..."
+	@pwsh -ExecutionPolicy Bypass -File tests/api_test.ps1 -BaseUrl $(API_BASE_URL) 2>/dev/null || powershell -ExecutionPolicy Bypass -File tests/api_test.ps1 -BaseUrl $(API_BASE_URL)

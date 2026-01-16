@@ -65,4 +65,8 @@ debug_snapshot.db
 # Smithy build
 build/
 
+# API Tests
+tests/node_modules/
+
 .vscode
+te

@@ -121,6 +121,10 @@ public class UsersController : ControllerBase
         {
             return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new ConflictExceptionResponseContent { Message = ex.Message });
+        }
         catch (ArgumentException ex)
         {
             return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });

@@ -126,7 +126,7 @@ operation GetUser {
 operation UpdateUser {
     input: UpdateUserInput,
     output: UserOutput,
-    errors: [ValidationException, ResourceNotFoundException]
+    errors: [ValidationException, ResourceNotFoundException, ConflictException]
 }
 
 /// Delete a user

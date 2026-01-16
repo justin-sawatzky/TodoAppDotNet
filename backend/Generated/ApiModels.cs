@@ -184,6 +184,9 @@ namespace TodoApp.Generated
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string ListId { get; set; } = default!;
 
+        /// <summary>
+        /// Identifiers
+        /// </summary>
         [Newtonsoft.Json.JsonProperty("taskId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string TaskId { get; set; } = default!;
@@ -373,6 +376,9 @@ namespace TodoApp.Generated
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string ListId { get; set; } = default!;
 
+        /// <summary>
+        /// Identifiers
+        /// </summary>
         [Newtonsoft.Json.JsonProperty("taskId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string TaskId { get; set; } = default!;
@@ -655,6 +661,9 @@ namespace TodoApp.Generated
     public partial class TaskOrderEntry
     {
 
+        /// <summary>
+        /// Identifiers
+        /// </summary>
         [Newtonsoft.Json.JsonProperty("taskId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string TaskId { get; set; } = default!;
@@ -745,6 +754,9 @@ namespace TodoApp.Generated
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string ListId { get; set; } = default!;
 
+        /// <summary>
+        /// Identifiers
+        /// </summary>
         [Newtonsoft.Json.JsonProperty("taskId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string TaskId { get; set; } = default!;
@@ -913,6 +925,9 @@ namespace TodoApp.Generated
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string ListId { get; set; } = default!;
 
+        /// <summary>
+        /// Identifiers
+        /// </summary>
         [Newtonsoft.Json.JsonProperty("taskId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string TaskId { get; set; } = default!;

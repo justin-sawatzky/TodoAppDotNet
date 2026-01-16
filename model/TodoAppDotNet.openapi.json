@@ -301,6 +301,16 @@
                                 }
                             }
                         }
+                    },
+                    "409": {
+                        "description": "ConflictException 409 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConflictExceptionResponseContent"
+                                }
+                            }
+                        }
                     }
                 }
             }

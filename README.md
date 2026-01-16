@@ -202,6 +202,69 @@ make lint
 make clean
 ```
 
+## API Testing
+
+The project includes a comprehensive API test suite that validates all backend endpoints. Tests are available in multiple formats for cross-platform compatibility.
+
+### Running API Tests
+
+**Prerequisites**: The backend must be running before executing tests.
+
+```bash
+# Start the backend (using Docker)
+docker-compose up -d
+
+# Or start locally
+cd backend && dotnet run
+```
+
+**Using TypeScript (recommended - cross-platform):**
+```bash
+# First time only: install test dependencies
+make test-api-install
+
+# Run tests
+make test-api
+```
+
+**Using Bash/curl (macOS/Linux/Git Bash):**
+```bash
+make test-api-bash
+```
+
+**Using PowerShell (Windows):**
+```bash
+make test-api-powershell
+```
+
+**Custom API URL:**
+```bash
+make test-api API_BASE_URL=http://localhost:8080
+```
+
+### Test Coverage
+
+The test suite covers:
+- **User Operations**: Create, Read, Update, Delete, List, Lookup by email
+- **Todo List Operations**: Create, Read, Update, Delete, List
+- **Todo Task Operations**: Create, Read, Update, Delete, List, Reorder
+- **Error Handling**: Validation errors (400), Not found errors (404)
+
+### Running Tests Directly
+
+Without Make, you can run tests directly:
+
+```bash
+# TypeScript (requires Node.js 18+)
+cd tests && npx tsx api_test.ts --base-url http://localhost:5247
+
+# Bash
+bash tests/api_test.sh http://localhost:5247
+
+# PowerShell
+pwsh -File tests/api_test.ps1 -BaseUrl http://localhost:5247
+```
+
 ## API Development Workflow
 
 When you need to modify the API contract:
@@ -415,7 +478,12 @@ docker-compose ps
 ├── model/                              # Smithy API models
 │   ├── main.smithy                     # Main service definition
 │   └── resources/                      # Resource definitions
-|   └── TodoAppDotNet.openapi.json      # Pre generated OpenAPI model file
+│   └── TodoAppDotNet.openapi.json      # Pre generated OpenAPI model file
+├── tests/                              # API test suite
+│   ├── api_test.ts                     # TypeScript tests (cross-platform)
+│   ├── api_test.sh                     # Bash/curl tests (macOS/Linux)
+│   ├── api_test.ps1                    # PowerShell tests (Windows)
+│   └── package.json                    # Test dependencies
 ├── build/                              # Generated OpenAPI specs
 ├── docker-compose.yml                  # Multi-container orchestration
 ├── Makefile                            # Build and development commands
