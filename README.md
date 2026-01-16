@@ -395,30 +395,31 @@ docker-compose ps
 
 ```
 .
-├── backend/                    # .NET backend application
-│   ├── Controllers/           # API controllers
-│   ├── Services/              # Business logic layer
-│   ├── Repositories/          # Data access layer
-│   ├── Models/                # Entity models
-│   ├── DTOs/                  # Data transfer objects
-│   ├── Data/                  # EF Core DbContext
-│   ├── Generated/             # Auto-generated C# DTOs from OpenAPI
-│   ├── Program.cs             # Application entry point
-│   └── TodoAppDotNet.csproj   # Project file
+├── backend/                            # .NET backend application
+│   ├── Controllers/                    # API controllers
+│   ├── Services/                       # Business logic layer
+│   ├── Repositories/                   # Data access layer
+│   ├── Models/                         # Entity models
+│   ├── DTOs/                           # Data transfer objects
+│   ├── Data/                           # EF Core DbContext
+│   ├── Generated/                      # Auto-generated C# DTOs from OpenAPI
+│   ├── Program.cs                      # Application entry point
+│   └── TodoAppDotNet.csproj            # Project file
 ├── frontend/
-│   └── TodoAppFrontend/       # React TypeScript frontend
+│   └── TodoAppFrontend/                # React TypeScript frontend
 │       ├── src/
-│       │   ├── api/           # Generated TypeScript API client
-│       │   ├── components/    # React components
-│       │   └── types.ts       # TypeScript types
+│       │   ├── api/                    # Generated TypeScript API client
+│       │   ├── components/             # React components
+│       │   └── types.ts                # TypeScript types
 │       └── package.json
-├── model/                      # Smithy API models
-│   ├── main.smithy            # Main service definition
-│   └── resources/             # Resource definitions
-├── build/                      # Generated OpenAPI specs
-├── docker-compose.yml          # Multi-container orchestration
-├── Makefile                    # Build and development commands
-└── README.md                   # This file
+├── model/                              # Smithy API models
+│   ├── main.smithy                     # Main service definition
+│   └── resources/                      # Resource definitions
+|   └── TodoAppDotNet.openapi.json      # Pre generated OpenAPI model file
+├── build/                              # Generated OpenAPI specs
+├── docker-compose.yml                  # Multi-container orchestration
+├── Makefile                            # Build and development commands
+└── README.md                           # This file
 ```
 
 ## Features
