@@ -56,6 +56,33 @@ structure UpdateUserInput {
     email: Email
 }
 
+structure GetUserInput {
+    @required
+    @httpLabel
+    userId: UserId
+}
+
+structure DeleteUserInput {
+    @required
+    @httpLabel
+    userId: UserId
+}
+
+structure ListUsersInput {
+    @httpQuery("maxResults")
+    maxResults: MaxResults,
+    
+    @httpQuery("nextToken")
+    nextToken: NextToken
+}
+
+structure ListUsersOutput {
+    @required
+    users: UserList,
+    
+    nextToken: NextToken
+}
+
 /// Structure for user response
 structure UserOutput {
     @required
@@ -69,6 +96,10 @@ structure UserOutput {
     
     @required
     createdAt: Timestamp
+}
+
+list UserList {
+    member: UserOutput
 }
 
 /// Create a new user
@@ -88,12 +119,6 @@ operation GetUser {
     errors: [ValidationException, ResourceNotFoundException]
 }
 
-structure GetUserInput {
-    @required
-    @httpLabel
-    userId: UserId
-}
-
 /// Update a user
 @idempotent
 @http(method: "PUT", uri: "/users/{userId}")
@@ -111,12 +136,6 @@ operation DeleteUser {
     errors: [ValidationException, ResourceNotFoundException]
 }
 
-structure DeleteUserInput {
-    @required
-    @httpLabel
-    userId: UserId
-}
-
 /// List all users
 @readonly
 @http(method: "GET", uri: "/users")
@@ -124,25 +143,6 @@ structure DeleteUserInput {
 operation ListUsers {
     input: ListUsersInput,
     output: ListUsersOutput
-}
-
-structure ListUsersInput {
-    @httpQuery("maxResults")
-    maxResults: MaxResults,
-    
-    @httpQuery("nextToken")
-    nextToken: NextToken
-}
-
-structure ListUsersOutput {
-    @required
-    users: UserList,
-    
-    nextToken: NextToken
-}
-
-list UserList {
-    member: UserOutput
 }
 
 /// Common error structures
