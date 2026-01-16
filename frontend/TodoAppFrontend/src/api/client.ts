@@ -3,7 +3,7 @@ import type { paths } from './schema';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-export const client = createClient<paths>({ baseUrl: API_BASE_URL });
+const client = createClient<paths>({ baseUrl: API_BASE_URL });
 
 // Helper functions for common operations
 export const api = {

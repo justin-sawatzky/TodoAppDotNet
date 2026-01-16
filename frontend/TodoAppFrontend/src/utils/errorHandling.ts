@@ -101,13 +101,4 @@ export function getValidationHints(field: string): string {
   return hints[field.toLowerCase()] || '';
 }
 
-/**
- * Format validation errors for display
- */
-export function formatValidationErrors(errors: ValidationError[]): string {
-  if (errors.length === 1) {
-    return errors[0].message;
-  }
 
-  return errors.map((error, index) => `${index + 1}. ${error.message}`).join('\n');
-}
