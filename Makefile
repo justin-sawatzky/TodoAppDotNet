@@ -83,11 +83,6 @@ lint-frontend: ## Lint frontend TypeScript/React code
 	cd frontend/TodoAppFrontend && npm run format:check
 	@echo "✅ Frontend code linting passed"
 
-watch-model: ## Watch model files and regenerate code on changes (requires 'entr' tool)
-	@echo "Watching model files for changes... (Press Ctrl+C to stop)"
-	@echo "Note: This requires 'entr' tool. Install with: brew install entr (macOS) or apt-get install entr (Ubuntu)"
-	find model -name "*.smithy" | entr -r make generate-all
-
 run: ## Run the application with docker-compose
 	docker-compose up -d --build
 
@@ -104,9 +99,6 @@ clean: ## Remove all containers and images
 	docker-compose down --volumes --remove-orphans
 	docker system prune -f
 
-test: ## Test Docker builds
-	./docker-test.sh
-
 # Individual service commands
 build-backend: ## Build only backend
 	docker build -t todoapp-backend ./backend
@@ -114,17 +106,11 @@ build-backend: ## Build only backend
 build-frontend: ## Build only frontend
 	docker build -t todoapp-frontend ./frontend/TodoAppFrontend
 
-build-combined: ## Build combined container
-	docker build -t todoapp-combined .
-
 run-backend: ## Run only backend
 	docker run -d -p 5247:5247 --name todoapp-backend todoapp-backend
 
 run-frontend: ## Run only frontend
 	docker run -d -p 80:80 --name todoapp-frontend todoapp-frontend
-
-run-combined: ## Run combined container
-	docker run -d -p 80:80 -p 5247:5247 --name todoapp-combined todoapp-combined
 
 # Development commands
 dev: ## Start development environment
