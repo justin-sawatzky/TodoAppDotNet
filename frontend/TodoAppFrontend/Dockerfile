@@ -12,8 +12,11 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build argument for API URL
+ARG VITE_API_URL=/api
+
+# Build the application with the API URL
+RUN VITE_API_URL=$VITE_API_URL npm run build
 
 # Production stage with nginx
 FROM nginx:alpine AS production

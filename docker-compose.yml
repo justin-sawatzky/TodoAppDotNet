@@ -24,11 +24,11 @@ services:
     build:
       context: ./frontend/TodoAppFrontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api
     container_name: todoapp-frontend
     ports:
       - "80:80"
-    environment:
-      - VITE_API_URL=http://localhost:5247
     depends_on:
       - backend
     networks:

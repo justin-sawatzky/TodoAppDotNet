@@ -11,9 +11,31 @@ interface TaskListProps {
   tasks: TodoTask[];
   onTaskUpdate: () => void;
   onApiError: (error: unknown, operation: string) => boolean; // Returns true if user was invalidated
+  editingListId: string | null;
+  editingListName: string;
+  editingListDescription: string;
+  onStartEditList: (list: TodoList) => void;
+  onSaveEditList: (listId: string) => void;
+  onCancelEditList: () => void;
+  onEditListNameChange: (name: string) => void;
+  onEditListDescriptionChange: (description: string) => void;
 }
 
-export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskListProps) {
+export function TaskList({
+  user,
+  list,
+  tasks,
+  onTaskUpdate,
+  onApiError,
+  editingListId,
+  editingListName,
+  editingListDescription,
+  onStartEditList,
+  onSaveEditList,
+  onCancelEditList,
+  onEditListNameChange,
+  onEditListDescriptionChange,
+}: TaskListProps) {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingDescription, setEditingDescription] = useState('');
@@ -167,8 +189,47 @@ export function TaskList({ user, list, tasks, onTaskUpdate, onApiError }: TaskLi
   return (
     <div className="task-list">
       <div className="task-list-header">
-        <h2>{list.name}</h2>
-        {list.description && <p className="list-description">{list.description}</p>}
+        {editingListId === list.listId ? (
+          <div className="list-edit-form">
+            <input
+              type="text"
+              value={editingListName}
+              onChange={(e) => onEditListNameChange(e.target.value)}
+              placeholder="List name..."
+              className="list-name-input"
+              autoFocus
+            />
+            <textarea
+              value={editingListDescription}
+              onChange={(e) => onEditListDescriptionChange(e.target.value)}
+              placeholder="Description (optional)..."
+              className="list-description-input"
+              rows={3}
+            />
+            <div className="list-edit-buttons">
+              <button onClick={() => onSaveEditList(list.listId)} className="btn-save" title="Save">
+                ✓ Save
+              </button>
+              <button onClick={onCancelEditList} className="btn-cancel" title="Cancel">
+                ✕ Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="list-header-content">
+              <h2>{list.name}</h2>
+              <button
+                onClick={() => onStartEditList(list)}
+                className="btn-edit-list"
+                title="Edit list"
+              >
+                ✎ Edit
+              </button>
+            </div>
+            {list.description && <p className="list-description">{list.description}</p>}
+          </>
+        )}
       </div>
 
       <form onSubmit={handleCreateTask} className="new-task-form">

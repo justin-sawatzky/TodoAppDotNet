@@ -17,6 +17,9 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const [selectedList, setSelectedList] = useState<TodoList | null>(null);
   const [tasks, setTasks] = useState<TodoTask[]>([]);
   const [newListName, setNewListName] = useState('');
+  const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [editingListName, setEditingListName] = useState('');
+  const [editingListDescription, setEditingListDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const { error, handleApiCall, clearError, handleError } = useApiError();
 
@@ -182,6 +185,50 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     await loadListsAfterUpdate();
   };
 
+  const handleStartEditList = (list: TodoList) => {
+    setEditingListId(list.listId);
+    setEditingListName(list.name);
+    setEditingListDescription(list.description || '');
+    clearError();
+  };
+
+  const handleSaveEditList = async (listId: string) => {
+    if (!editingListName.trim()) return;
+
+    const { error: apiError } = await handleApiCall(
+      () =>
+        api.lists.update(
+          user.userId,
+          listId,
+          editingListName,
+          editingListDescription.trim() || undefined
+        ),
+      'update list'
+    );
+
+    if (apiError) {
+      return;
+    }
+
+    setEditingListId(null);
+    await loadListsAfterUpdate();
+
+    // Update selected list if it's the one being edited
+    if (selectedList?.listId === listId) {
+      const updatedList = lists.find((l) => l.listId === listId);
+      if (updatedList) {
+        setSelectedList(updatedList);
+      }
+    }
+  };
+
+  const handleCancelEditList = () => {
+    setEditingListId(null);
+    setEditingListName('');
+    setEditingListDescription('');
+    clearError();
+  };
+
   const handleTaskUpdate = async () => {
     await loadTasksAfterUpdate();
   };
@@ -254,6 +301,14 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
               tasks={tasks}
               onTaskUpdate={handleTaskUpdate}
               onApiError={handleTaskError}
+              editingListId={editingListId}
+              editingListName={editingListName}
+              editingListDescription={editingListDescription}
+              onStartEditList={handleStartEditList}
+              onSaveEditList={handleSaveEditList}
+              onCancelEditList={handleCancelEditList}
+              onEditListNameChange={setEditingListName}
+              onEditListDescriptionChange={setEditingListDescription}
             />
           ) : (
             <div className="empty-state">
