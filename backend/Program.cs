@@ -40,9 +40,24 @@ else
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=todoapp.db"));
 }
 
-// Register dependencies
+// Register services
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, SqliteUserRepository>();
+builder.Services.AddScoped<ITodoListService, TodoListService>();
+builder.Services.AddScoped<ITodoTaskService, TodoTaskService>();
+
+// Register repositories based on database configuration
+if (useInMemoryDb)
+{
+    builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
+    builder.Services.AddSingleton<ITodoListRepository, InMemoryTodoListRepository>();
+    builder.Services.AddSingleton<ITodoTaskRepository, InMemoryTodoTaskRepository>();
+}
+else
+{
+    builder.Services.AddScoped<IUserRepository, SqliteUserRepository>();
+    builder.Services.AddScoped<ITodoListRepository, SqliteTodoListRepository>();
+    builder.Services.AddScoped<ITodoTaskRepository, SqliteTodoTaskRepository>();
+}
 
 var app = builder.Build();
 

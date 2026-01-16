@@ -13,7 +13,8 @@ resource User {
     read: GetUser,
     update: UpdateUser,
     delete: DeleteUser,
-    list: ListUsers
+    list: ListUsers,
+    collectionOperations: [GetUserByEmail]
 }
 
 /// User identifier
@@ -142,7 +143,24 @@ operation DeleteUser {
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "maxResults")
 operation ListUsers {
     input: ListUsersInput,
-    output: ListUsersOutput
+    output: ListUsersOutput,
+    errors: [ValidationException]
+}
+
+/// Get a user by email address
+structure GetUserByEmailInput {
+    @required
+    @httpQuery("email")
+    email: Email
+}
+
+/// Get a user by their email address
+@readonly
+@http(method: "GET", uri: "/users/lookup")
+operation GetUserByEmail {
+    input: GetUserByEmailInput,
+    output: UserOutput,
+    errors: [ValidationException, ResourceNotFoundException]
 }
 
 /// Common error structures

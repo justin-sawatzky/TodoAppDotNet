@@ -1,6 +1,4 @@
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using TodoApp.DTOs;
 using TodoApp.Generated;
 using TodoApp.Services;
 
@@ -18,7 +16,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ListUsersResponse>> ListUsers(
+    public async Task<ActionResult<ListUsersResponseContent>> ListUsers(
         [FromQuery] double? maxResults = null,
         [FromQuery] string? nextToken = null,
         CancellationToken cancellationToken = default)
@@ -30,48 +28,41 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ErrorResponse { Message = ex.Message });
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
         }
     }
 
     [HttpPost]
-    public async Task<ActionResult<UserResponse>> CreateUser(
+    public async Task<ActionResult<UserOutput>> CreateUser(
         [FromBody] CreateUserRequestContent request,
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
         }
 
         try
         {
-            // Convert generated DTO to service DTO
-            var serviceRequest = new CreateUserRequest
-            {
-                Username = request.Username,
-                Email = request.Email
-            };
-
-            var result = await _userService.CreateUserAsync(serviceRequest, cancellationToken);
+            var result = await _userService.CreateUserAsync(request, cancellationToken);
             return Ok(result);
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            return Conflict(new ErrorResponse { Message = ex.Message });
+            return Conflict(new ConflictExceptionResponseContent { Message = ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ErrorResponse { Message = ex.Message });
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
         }
     }
 
     [HttpGet("{userId}")]
-    public async Task<ActionResult<UserResponse>> GetUser(
+    public async Task<ActionResult<UserOutput>> GetUser(
         string userId,
         CancellationToken cancellationToken = default)
     {
@@ -82,48 +73,61 @@ public class UsersController : ControllerBase
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ErrorResponse { Message = ex.Message });
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("lookup")]
+    public async Task<ActionResult<UserOutput>> GetUserByEmail(
+        [FromQuery] string email,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _userService.GetUserByEmailAsync(email, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
         }
     }
 
     [HttpPut("{userId}")]
-    public async Task<ActionResult<UserResponse>> UpdateUser(
+    public async Task<ActionResult<UserOutput>> UpdateUser(
         string userId,
         [FromBody] UpdateUserRequestContent request,
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
         }
 
         try
         {
-            // Convert generated DTO to service DTO
-            var serviceRequest = new UpdateUserRequest
-            {
-                Username = request.Username,
-                Email = request.Email
-            };
-
-            var result = await _userService.UpdateUserAsync(userId, serviceRequest, cancellationToken);
+            var result = await _userService.UpdateUserAsync(userId, request, cancellationToken);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ErrorResponse { Message = ex.Message });
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
         }
     }
 
@@ -139,11 +143,11 @@ public class UsersController : ControllerBase
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ErrorResponse { Message = ex.Message });
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
         }
     }
 }

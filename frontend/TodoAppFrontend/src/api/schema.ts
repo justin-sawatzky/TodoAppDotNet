@@ -22,6 +22,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get a user by their email address */
+        get: operations["GetUserByEmail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{userId}": {
         parameters: {
             query?: never;
@@ -85,6 +102,23 @@ export interface paths {
         put?: never;
         /** @description TodoTask operations */
         post: operations["CreateTodoTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/lists/{listId}/tasks/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Batch reorder tasks within a list */
+        put: operations["ReorderTodoTasks"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -209,6 +243,17 @@ export interface components {
             updatedAt: number;
         };
         /** @description Structure for user response */
+        GetUserByEmailResponseContent: {
+            /** @description User identifier */
+            userId: string;
+            /** @description Username with validation constraints */
+            username: string;
+            /** @description Email with validation constraints */
+            email: string;
+            /** Format: double */
+            createdAt: number;
+        };
+        /** @description Structure for user response */
         GetUserResponseContent: {
             /** @description User identifier */
             userId: string;
@@ -234,8 +279,23 @@ export interface components {
             /** @description Pagination token constraint */
             nextToken?: string;
         };
+        /** @description Input for batch reorder operation */
+        ReorderTodoTasksRequestContent: {
+            /** @description List of task order entries */
+            taskOrders: components["schemas"]["TaskOrderEntry"][];
+        };
+        /** @description Output for batch reorder operation */
+        ReorderTodoTasksResponseContent: {
+            tasks: components["schemas"]["TodoTaskOutput"][];
+        };
         ResourceNotFoundExceptionResponseContent: {
             message: string;
+        };
+        /** @description Task order entry for batch reorder */
+        TaskOrderEntry: {
+            taskId: string;
+            /** @description Task order with validation constraints */
+            order: number;
         };
         TodoListOutput: {
             /** @description User identifier */
@@ -415,6 +475,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConflictExceptionResponseContent"];
+                };
+            };
+        };
+    };
+    GetUserByEmail: {
+        parameters: {
+            query: {
+                /** @description Email with validation constraints */
+                email: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description GetUserByEmail 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetUserByEmailResponseContent"];
+                };
+            };
+            /** @description ValidationException 400 response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationExceptionResponseContent"];
+                };
+            };
+            /** @description ResourceNotFoundException 404 response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceNotFoundExceptionResponseContent"];
                 };
             };
         };
@@ -804,6 +905,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CreateTodoTaskResponseContent"];
+                };
+            };
+            /** @description ValidationException 400 response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationExceptionResponseContent"];
+                };
+            };
+            /** @description ResourceNotFoundException 404 response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceNotFoundExceptionResponseContent"];
+                };
+            };
+        };
+    };
+    ReorderTodoTasks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User identifier */
+                userId: string;
+                /** @description Identifiers */
+                listId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderTodoTasksRequestContent"];
+            };
+        };
+        responses: {
+            /** @description ReorderTodoTasks 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReorderTodoTasksResponseContent"];
                 };
             };
             /** @description ValidationException 400 response */

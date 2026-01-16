@@ -1,10 +1,6 @@
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TodoApp.Data;
-using TodoApp.DTOs;
 using TodoApp.Generated;
-using TodoApp.Models;
+using TodoApp.Services;
 
 namespace TodoApp.Controllers;
 
@@ -12,132 +8,135 @@ namespace TodoApp.Controllers;
 [Route("users/{userId}/lists")]
 public class TodoListsController : ControllerBase
 {
-    private readonly TodoAppDbContext _context;
+    private readonly ITodoListService _todoListService;
 
-    public TodoListsController(TodoAppDbContext context)
+    public TodoListsController(ITodoListService todoListService)
     {
-        _context = context;
+        _todoListService = todoListService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ListTodoListsResponse>> ListTodoLists(
+    public async Task<ActionResult<ListTodoListsResponseContent>> ListTodoLists(
         string userId,
         [FromQuery] int? maxResults,
-        [FromQuery] string? nextToken)
+        [FromQuery] string? nextToken,
+        CancellationToken cancellationToken = default)
     {
-        // Load all lists and order on client side for SQLite compatibility
-        var lists = await _context.TodoLists
-            .Where(l => l.UserId == userId)
-            .ToListAsync();
-
-        var orderedLists = lists.OrderBy(l => l.CreatedAt).ToList();
-
-        return Ok(new ListTodoListsResponse
+        try
         {
-            Lists = orderedLists.Select(MapToResponse).ToList()
-        });
+            var result = await _todoListService.ListTodoListsAsync(userId, maxResults, nextToken, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
     [HttpPost]
-    public async Task<ActionResult<TodoListResponse>> CreateTodoList(
+    public async Task<ActionResult<TodoListOutput>> CreateTodoList(
         string userId,
-        [FromBody] CreateTodoListRequestContent request)
+        [FromBody] CreateTodoListRequestContent request,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
         }
 
-        var list = new TodoList
+        try
         {
-            UserId = userId,
-            ListId = Guid.NewGuid().ToString(),
-            Name = request.Name,
-            Description = request.Description,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
-
-        _context.TodoLists.Add(list);
-        await _context.SaveChangesAsync();
-
-        return Ok(MapToResponse(list));
+            var result = await _todoListService.CreateTodoListAsync(userId, request, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
     [HttpGet("{listId}")]
-    public async Task<ActionResult<TodoListResponse>> GetTodoList(string userId, string listId)
+    public async Task<ActionResult<TodoListOutput>> GetTodoList(
+        string userId,
+        string listId,
+        CancellationToken cancellationToken = default)
     {
-        var list = await _context.TodoLists
-            .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
-
-        if (list == null)
+        try
         {
-            return NotFound(new { message = "List not found" });
+            var result = await _todoListService.GetTodoListAsync(userId, listId, cancellationToken);
+            return Ok(result);
         }
-
-        return Ok(MapToResponse(list));
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
     [HttpPut("{listId}")]
-    public async Task<ActionResult<TodoListResponse>> UpdateTodoList(
+    public async Task<ActionResult<TodoListOutput>> UpdateTodoList(
         string userId,
         string listId,
-        [FromBody] UpdateTodoListRequestContent request)
+        [FromBody] UpdateTodoListRequestContent request,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
         }
 
-        var list = await _context.TodoLists
-            .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
-
-        if (list == null)
+        try
         {
-            return NotFound(new { message = "List not found" });
+            var result = await _todoListService.UpdateTodoListAsync(userId, listId, request, cancellationToken);
+            return Ok(result);
         }
-
-        if (!string.IsNullOrWhiteSpace(request.Name))
+        catch (KeyNotFoundException ex)
         {
-            list.Name = request.Name;
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
         }
-
-        if (request.Description != null)
+        catch (ArgumentException ex)
         {
-            list.Description = request.Description;
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
         }
-
-        list.UpdatedAt = DateTimeOffset.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return Ok(MapToResponse(list));
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
     [HttpDelete("{listId}")]
-    public async Task<IActionResult> DeleteTodoList(string userId, string listId)
+    public async Task<ActionResult> DeleteTodoList(
+        string userId,
+        string listId,
+        CancellationToken cancellationToken = default)
     {
-        var list = await _context.TodoLists
-            .FirstOrDefaultAsync(l => l.UserId == userId && l.ListId == listId);
-
-        if (list == null)
+        try
         {
-            return NotFound(new { message = "List not found" });
+            await _todoListService.DeleteTodoListAsync(userId, listId, cancellationToken);
+            return Ok();
         }
-
-        _context.TodoLists.Remove(list);
-        await _context.SaveChangesAsync();
-
-        return Ok();
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
-
-    private static TodoListResponse MapToResponse(TodoList list) => new()
-    {
-        UserId = list.UserId,
-        ListId = list.ListId,
-        Name = list.Name,
-        Description = list.Description,
-        CreatedAt = list.CreatedAt.ToUnixTimeSeconds(),
-        UpdatedAt = list.UpdatedAt.ToUnixTimeSeconds()
-    };
 }

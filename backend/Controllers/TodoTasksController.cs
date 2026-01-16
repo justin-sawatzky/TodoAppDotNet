@@ -1,10 +1,6 @@
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TodoApp.Data;
-using TodoApp.DTOs;
 using TodoApp.Generated;
-using TodoApp.Models;
+using TodoApp.Services;
 
 namespace TodoApp.Controllers;
 
@@ -12,165 +8,172 @@ namespace TodoApp.Controllers;
 [Route("users/{userId}/lists/{listId}/tasks")]
 public class TodoTasksController : ControllerBase
 {
-    private readonly TodoAppDbContext _context;
+    private readonly ITodoTaskService _todoTaskService;
 
-    public TodoTasksController(TodoAppDbContext context)
+    public TodoTasksController(ITodoTaskService todoTaskService)
     {
-        _context = context;
+        _todoTaskService = todoTaskService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ListTodoTasksResponse>> ListTodoTasks(
+    public async Task<ActionResult<ListTodoTasksResponseContent>> ListTodoTasks(
         string userId,
         string listId,
         [FromQuery] int? maxResults,
         [FromQuery] string? nextToken,
-        [FromQuery] bool? completed)
+        [FromQuery] bool? completed,
+        CancellationToken cancellationToken = default)
     {
-        var query = _context.TodoTasks
-            .Where(t => t.UserId == userId && t.ListId == listId);
-
-        if (completed.HasValue)
+        try
         {
-            query = query.Where(t => t.Completed == completed.Value);
+            var result = await _todoTaskService.ListTodoTasksAsync(userId, listId, maxResults, nextToken, completed, cancellationToken);
+            return Ok(result);
         }
-
-        // Load all tasks and order by Order field, then by CreatedAt
-        var tasks = await query.ToListAsync();
-        var orderedTasks = tasks.OrderBy(t => t.Order).ThenBy(t => t.CreatedAt).ToList();
-
-        return Ok(new ListTodoTasksResponse
+        catch (KeyNotFoundException ex)
         {
-            Tasks = orderedTasks.Select(MapToResponse).ToList()
-        });
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
     [HttpPost]
-    public async Task<ActionResult<TodoTaskResponse>> CreateTodoTask(
+    public async Task<ActionResult<TodoTaskOutput>> CreateTodoTask(
         string userId,
         string listId,
-        [FromBody] CreateTodoTaskRequestContent request)
+        [FromBody] CreateTodoTaskRequestContent request,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
         }
 
-        // Get the max order value for this list
-        var maxOrder = await _context.TodoTasks
-            .Where(t => t.UserId == userId && t.ListId == listId)
-            .Select(t => (int?)t.Order)
-            .MaxAsync() ?? -1;
-
-        var task = new TodoTask
+        try
         {
-            UserId = userId,
-            ListId = listId,
-            TaskId = Guid.NewGuid().ToString(),
-            Description = request.Description,
-            Completed = request.Completed ?? false,
-            Order = (int)(request.Order ?? (maxOrder + 1)),
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
-
-        _context.TodoTasks.Add(task);
-        await _context.SaveChangesAsync();
-
-        return Ok(MapToResponse(task));
+            var result = await _todoTaskService.CreateTodoTaskAsync(userId, listId, request, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
     [HttpGet("{taskId}")]
-    public async Task<ActionResult<TodoTaskResponse>> GetTodoTask(
-        string userId,
-        string listId,
-        string taskId)
-    {
-        var task = await _context.TodoTasks
-            .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
-
-        if (task == null)
-        {
-            return NotFound(new { message = "Task not found" });
-        }
-
-        return Ok(MapToResponse(task));
-    }
-
-    [HttpPut("{taskId}")]
-    public async Task<ActionResult<TodoTaskResponse>> UpdateTodoTask(
+    public async Task<ActionResult<TodoTaskOutput>> GetTodoTask(
         string userId,
         string listId,
         string taskId,
-        [FromBody] UpdateTodoTaskRequestContent request)
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _todoTaskService.GetTodoTaskAsync(userId, listId, taskId, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
+    }
+
+    [HttpPut("{taskId}")]
+    public async Task<ActionResult<TodoTaskOutput>> UpdateTodoTask(
+        string userId,
+        string listId,
+        string taskId,
+        [FromBody] UpdateTodoTaskRequestContent request,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
         }
 
-        var task = await _context.TodoTasks
-            .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
-
-        if (task == null)
+        try
         {
-            return NotFound(new { message = "Task not found" });
+            var result = await _todoTaskService.UpdateTodoTaskAsync(userId, listId, taskId, request, cancellationToken);
+            return Ok(result);
         }
-
-        // For update operations, we only update fields that are provided and not empty/default
-        if (!string.IsNullOrWhiteSpace(request.Description))
+        catch (KeyNotFoundException ex)
         {
-            task.Description = request.Description;
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
         }
-
-        // For boolean, we only update it if it's provided (not null)
-        if (request.Completed.HasValue)
+        catch (ArgumentException ex)
         {
-            task.Completed = request.Completed.Value;
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
         }
-
-        // For order, we only update if it's provided (not null)
-        if (request.Order.HasValue)
+        catch (Exception ex)
         {
-            task.Order = (int)request.Order.Value;
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
         }
-
-        task.UpdatedAt = DateTimeOffset.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return Ok(MapToResponse(task));
     }
 
     [HttpDelete("{taskId}")]
-    public async Task<IActionResult> DeleteTodoTask(
+    public async Task<ActionResult> DeleteTodoTask(
         string userId,
         string listId,
-        string taskId)
+        string taskId,
+        CancellationToken cancellationToken = default)
     {
-        var task = await _context.TodoTasks
-            .FirstOrDefaultAsync(t => t.UserId == userId && t.ListId == listId && t.TaskId == taskId);
-
-        if (task == null)
+        try
         {
-            return NotFound(new { message = "Task not found" });
+            await _todoTaskService.DeleteTodoTaskAsync(userId, listId, taskId, cancellationToken);
+            return Ok();
         }
-
-        _context.TodoTasks.Remove(task);
-        await _context.SaveChangesAsync();
-
-        return Ok();
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
     }
 
-    private static TodoTaskResponse MapToResponse(TodoTask task) => new()
+    [HttpPut("reorder")]
+    public async Task<ActionResult<ReorderTodoTasksResponseContent>> ReorderTodoTasks(
+        string userId,
+        string listId,
+        [FromBody] ReorderTodoTasksRequestContent request,
+        CancellationToken cancellationToken = default)
     {
-        UserId = task.UserId,
-        ListId = task.ListId,
-        TaskId = task.TaskId,
-        Description = task.Description,
-        Completed = task.Completed,
-        Order = task.Order,
-        CreatedAt = task.CreatedAt.ToUnixTimeSeconds(),
-        UpdatedAt = task.UpdatedAt.ToUnixTimeSeconds()
-    };
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ValidationExceptionResponseContent { Message = "Validation failed: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+        }
+
+        try
+        {
+            var result = await _todoTaskService.ReorderTodoTasksAsync(userId, listId, request, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ResourceNotFoundExceptionResponseContent { Message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ValidationExceptionResponseContent { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ValidationExceptionResponseContent { Message = ex.Message });
+        }
+    }
 }

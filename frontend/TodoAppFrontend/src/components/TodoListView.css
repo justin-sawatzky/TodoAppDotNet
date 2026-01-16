@@ -162,3 +162,25 @@
   color: #999;
   font-size: 1.2rem;
 }
+
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.list-items .loading-state,
+.list-items .empty-list-state {
+  padding: 1rem;
+  color: #999;
+  font-style: italic;
+  border-bottom: none;
+}
+
+.content-area .loading-state {
+  height: 100%;
+}

@@ -15,6 +15,8 @@ export const api = {
     list: () => client.GET('/users'),
 
     get: (userId: string) => client.GET('/users/{userId}', { params: { path: { userId } } }),
+
+    getByEmail: (email: string) => client.GET('/users/lookup', { params: { query: { email } } }),
   },
 
   // TodoList operations
@@ -83,6 +85,12 @@ export const api = {
     delete: (userId: string, listId: string, taskId: string) =>
       client.DELETE('/users/{userId}/lists/{listId}/tasks/{taskId}', {
         params: { path: { userId, listId, taskId } },
+      }),
+
+    reorder: (userId: string, listId: string, taskOrders: { taskId: string; order: number }[]) =>
+      client.PUT('/users/{userId}/lists/{listId}/tasks/reorder', {
+        params: { path: { userId, listId } },
+        body: { taskOrders },
       }),
   },
 };

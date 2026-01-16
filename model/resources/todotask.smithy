@@ -19,11 +19,11 @@ resource TodoTask {
     read: GetTodoTask,
     update: UpdateTodoTask,
     delete: DeleteTodoTask,
-    list: ListTodoTasks
+    list: ListTodoTasks,
+    collectionOperations: [ReorderTodoTasks]
 }
 
 /// Identifiers
-string ListId
 string TaskId
 
 /// Task description with validation constraints
@@ -189,5 +189,49 @@ operation DeleteTodoTask {
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "maxResults")
 operation ListTodoTasks {
     input: ListTodoTasksInput,
-    output: ListTodoTasksOutput
+    output: ListTodoTasksOutput,
+    errors: [ValidationException, ResourceNotFoundException]
+}
+
+/// Task order entry for batch reorder
+structure TaskOrderEntry {
+    @required
+    taskId: TaskId,
+    
+    @required
+    order: TaskOrder
+}
+
+/// List of task order entries
+list TaskOrderList {
+    member: TaskOrderEntry
+}
+
+/// Input for batch reorder operation
+structure ReorderTodoTasksInput {
+    @required
+    @httpLabel
+    userId: UserId,
+    
+    @required
+    @httpLabel
+    listId: ListId,
+    
+    @required
+    taskOrders: TaskOrderList
+}
+
+/// Output for batch reorder operation
+structure ReorderTodoTasksOutput {
+    @required
+    tasks: TodoTaskList
+}
+
+/// Batch reorder tasks within a list
+@idempotent
+@http(method: "PUT", uri: "/users/{userId}/lists/{listId}/tasks/reorder")
+operation ReorderTodoTasks {
+    input: ReorderTodoTasksInput,
+    output: ReorderTodoTasksOutput,
+    errors: [ValidationException, ResourceNotFoundException]
 }

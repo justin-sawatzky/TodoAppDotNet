@@ -1,12 +1,13 @@
-using TodoApp.DTOs;
+using TodoApp.Generated;
 
 namespace TodoApp.Services;
 
 public interface IUserService
 {
-    Task<ListUsersResponse> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken);
-    Task<UserResponse> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken);
-    Task<UserResponse> GetUserAsync(string userId, CancellationToken cancellationToken);
-    Task<UserResponse> UpdateUserAsync(string userId, UpdateUserRequest request, CancellationToken cancellationToken);
+    Task<ListUsersResponseContent> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken);
+    Task<UserOutput> CreateUserAsync(CreateUserRequestContent request, CancellationToken cancellationToken);
+    Task<UserOutput> GetUserAsync(string userId, CancellationToken cancellationToken);
+    Task<UserOutput> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<UserOutput> UpdateUserAsync(string userId, UpdateUserRequestContent request, CancellationToken cancellationToken);
     Task DeleteUserAsync(string userId, CancellationToken cancellationToken);
 }

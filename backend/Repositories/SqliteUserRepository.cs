@@ -15,22 +15,23 @@ public class SqliteUserRepository : IUserRepository
 
     public async Task<(List<User> users, string? nextToken)> GetUsersAsync(int maxResults, string? nextToken, CancellationToken cancellationToken)
     {
-        // Convert to client evaluation for SQLite compatibility with DateTimeOffset
-        var allUsers = await _context.Users.ToListAsync(cancellationToken);
-        var orderedUsers = allUsers.OrderBy(u => u.CreatedAt).ToList();
-
         int skip = 0;
         if (!string.IsNullOrEmpty(nextToken) && int.TryParse(nextToken, out var tokenIndex))
         {
             skip = tokenIndex;
         }
 
-        var users = orderedUsers
+        // Use database-side ordering and AsNoTracking for read-only query
+        var users = await _context.Users
+            .AsNoTracking()
+            .OrderBy(u => u.CreatedAt)
             .Skip(skip)
             .Take(maxResults)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        var hasMore = orderedUsers.Count > skip + maxResults;
+        // Check if there are more results
+        var totalCount = await _context.Users.CountAsync(cancellationToken);
+        var hasMore = totalCount > skip + maxResults;
         var nextPageToken = hasMore ? (skip + maxResults).ToString() : null;
 
         return (users, nextPageToken);

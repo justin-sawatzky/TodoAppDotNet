@@ -36,25 +36,28 @@ export function Login({ onLogin }: LoginProps) {
         onLogin(data as User);
       }
     } else {
-      // Find existing user by email
-      const { data, error: apiError } = await handleApiCall(() => api.users.list(), 'fetch users');
+      // Find existing user by email using the lookup endpoint
+      const { data, error: apiError } = await handleApiCall(
+        () => api.users.getByEmail(email),
+        'find user'
+      );
 
       if (apiError) {
+        // If user not found, show a helpful message
+        if (apiError.type === 'not_found') {
+          handleError(
+            {
+              message: `No account found with email ${email}. Please create a new account or check your email address.`,
+            },
+            'find user'
+          );
+        }
         setLoading(false);
         return;
       }
 
-      const user = data?.users?.find((u) => u.email === email);
-      if (user) {
-        onLogin(user as User);
-      } else {
-        // User not found - create a helpful error message
-        handleError(
-          {
-            message: `No account found with email ${email}. Please create a new account or check your email address.`,
-          },
-          'find user'
-        );
+      if (data) {
+        onLogin(data as User);
       }
     }
 

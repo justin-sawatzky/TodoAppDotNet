@@ -154,5 +154,6 @@ operation DeleteTodoList {
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "maxResults")
 operation ListTodoLists {
     input: ListTodoListsInput,
-    output: ListTodoListsOutput
+    output: ListTodoListsOutput,
+    errors: [ValidationException, ResourceNotFoundException]
 }

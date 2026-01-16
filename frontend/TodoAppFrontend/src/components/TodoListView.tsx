@@ -22,6 +22,8 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const [editingListName, setEditingListName] = useState('');
   const [editingListDescription, setEditingListDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingLists, setLoadingLists] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(false);
   const { error, handleApiCall, clearError, handleError } = useApiError();
 
   // Helper function to handle user invalidation
@@ -50,6 +52,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     let isMounted = true;
 
     const loadLists = async () => {
+      setLoadingLists(true);
       const { data, error: apiError } = await handleApiCall(
         () => api.lists.list(user.userId),
         'load lists'
@@ -59,12 +62,14 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
 
       if (apiError) {
         handleUserInvalidation(apiError);
+        setLoadingLists(false);
         return;
       }
 
       if (data?.lists) {
         setLists(data.lists as TodoList[]);
       }
+      setLoadingLists(false);
     };
 
     loadLists();
@@ -80,6 +85,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     let isMounted = true;
 
     const loadTasks = async () => {
+      setLoadingTasks(true);
       const { data, error: apiError } = await handleApiCall(
         () => api.tasks.list(user.userId, selectedList.listId),
         'load tasks'
@@ -89,12 +95,14 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
 
       if (apiError) {
         handleUserInvalidation(apiError);
+        setLoadingTasks(false);
         return;
       }
 
       if (data?.tasks) {
         setTasks(data.tasks as TodoTask[]);
       }
+      setLoadingTasks(false);
     };
 
     loadTasks();
@@ -314,44 +322,54 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
           </form>
 
           <ul className="list-items">
-            {lists.map((list) => (
-              <li
-                key={list.listId}
-                className={selectedList?.listId === list.listId ? 'active' : ''}
-              >
-                <button onClick={() => handleSelectList(list)} className="list-item-button">
-                  {list.name}
-                </button>
-                <button
-                  onClick={() => handleDeleteList(list.listId)}
-                  className="btn-delete"
-                  title="Delete list"
+            {loadingLists ? (
+              <li className="loading-state">Loading lists...</li>
+            ) : lists.length === 0 ? (
+              <li className="empty-list-state">No lists yet. Create one above!</li>
+            ) : (
+              lists.map((list) => (
+                <li
+                  key={list.listId}
+                  className={selectedList?.listId === list.listId ? 'active' : ''}
                 >
-                  ×
-                </button>
-              </li>
-            ))}
+                  <button onClick={() => handleSelectList(list)} className="list-item-button">
+                    {list.name}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteList(list.listId)}
+                    className="btn-delete"
+                    title="Delete list"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))
+            )}
           </ul>
         </aside>
 
         <main className="content-area">
           {selectedList ? (
-            <TaskList
-              key={`${selectedList.listId}-${selectedList.updatedAt}`}
-              user={user}
-              list={selectedList}
-              tasks={tasks}
-              onTaskUpdate={handleTaskUpdate}
-              onApiError={handleTaskError}
-              editingListId={editingListId}
-              editingListName={editingListName}
-              editingListDescription={editingListDescription}
-              onStartEditList={handleStartEditList}
-              onSaveEditList={handleSaveEditList}
-              onCancelEditList={handleCancelEditList}
-              onEditListNameChange={setEditingListName}
-              onEditListDescriptionChange={setEditingListDescription}
-            />
+            loadingTasks ? (
+              <div className="loading-state">Loading tasks...</div>
+            ) : (
+              <TaskList
+                key={`${selectedList.listId}-${selectedList.updatedAt}`}
+                user={user}
+                list={selectedList}
+                tasks={tasks}
+                onTaskUpdate={handleTaskUpdate}
+                onApiError={handleTaskError}
+                editingListId={editingListId}
+                editingListName={editingListName}
+                editingListDescription={editingListDescription}
+                onStartEditList={handleStartEditList}
+                onSaveEditList={handleSaveEditList}
+                onCancelEditList={handleCancelEditList}
+                onEditListNameChange={setEditingListName}
+                onEditListDescriptionChange={setEditingListDescription}
+              />
+            )
           ) : (
             <div className="empty-state">
               <p>Select a list to view tasks</p>

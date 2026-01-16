@@ -1,4 +1,4 @@
-using TodoApp.DTOs;
+using TodoApp.Generated;
 using TodoApp.Models;
 using TodoApp.Repositories;
 
@@ -13,21 +13,21 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<ListUsersResponse> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken)
+    public async Task<ListUsersResponseContent> ListUsersAsync(double? maxResults, string? nextToken, CancellationToken cancellationToken)
     {
         var (users, nextPageToken) = await _userRepository.GetUsersAsync(
             (int?)maxResults ?? 50,
             nextToken,
             cancellationToken);
 
-        return new ListUsersResponse
+        return new ListUsersResponseContent
         {
-            Users = users.Select(MapToUserResponse).ToList(),
+            Users = users.Select(MapToOutput).ToList(),
             NextToken = nextPageToken
         };
     }
 
-    public async Task<UserResponse> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken)
+    public async Task<UserOutput> CreateUserAsync(CreateUserRequestContent request, CancellationToken cancellationToken)
     {
         // Validation
         if (string.IsNullOrWhiteSpace(request.Username))
@@ -58,10 +58,10 @@ public class UserService : IUserService
 
         await _userRepository.CreateUserAsync(user, cancellationToken);
 
-        return MapToUserResponse(user);
+        return MapToOutput(user);
     }
 
-    public async Task<UserResponse> GetUserAsync(string userId, CancellationToken cancellationToken)
+    public async Task<UserOutput> GetUserAsync(string userId, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
@@ -69,10 +69,21 @@ public class UserService : IUserService
             throw new KeyNotFoundException($"User with ID {userId} not found");
         }
 
-        return MapToUserResponse(user);
+        return MapToOutput(user);
     }
 
-    public async Task<UserResponse> UpdateUserAsync(string userId, UpdateUserRequest request, CancellationToken cancellationToken)
+    public async Task<UserOutput> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email, cancellationToken);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with email {email} not found");
+        }
+
+        return MapToOutput(user);
+    }
+
+    public async Task<UserOutput> UpdateUserAsync(string userId, UpdateUserRequestContent request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user == null)
@@ -93,7 +104,7 @@ public class UserService : IUserService
 
         await _userRepository.UpdateUserAsync(user, cancellationToken);
 
-        return MapToUserResponse(user);
+        return MapToOutput(user);
     }
 
     public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken)
@@ -108,7 +119,7 @@ public class UserService : IUserService
     }
 
     // Mapping methods
-    private static UserResponse MapToUserResponse(User user) => new()
+    private static UserOutput MapToOutput(User user) => new()
     {
         UserId = user.UserId,
         Username = user.Username,
