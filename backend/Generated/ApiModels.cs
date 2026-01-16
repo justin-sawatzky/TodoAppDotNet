@@ -67,7 +67,7 @@ namespace TodoApp.Generated
         /// </summary>
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string? Description { get; set; }
+        public string? Description { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -109,9 +109,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// List description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -145,15 +145,15 @@ namespace TodoApp.Generated
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
         public string Description { get; set; } = default!;
 
-        [Newtonsoft.Json.JsonProperty("completed", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool Completed { get; set; } = false;
+        [Newtonsoft.Json.JsonProperty("completed", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool? Completed { get; set; } = false;
 
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double Order { get; set; } = default!;
+        public double? Order { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -202,9 +202,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double Order { get; set; } = default!;
+        public double? Order { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -334,9 +334,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// List description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -391,9 +391,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double Order { get; set; } = default!;
+        public double? Order { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -469,9 +469,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Pagination token constraint
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("nextToken", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("nextToken", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
-        public string NextToken { get; set; } = default!;
+        public string? NextToken { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -495,9 +495,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Pagination token constraint
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("nextToken", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("nextToken", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
-        public string NextToken { get; set; } = default!;
+        public string? NextToken { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -521,9 +521,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Pagination token constraint
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("nextToken", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("nextToken", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
-        public string NextToken { get; set; } = default!;
+        public string? NextToken { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -584,9 +584,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// List description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -641,9 +641,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double Order { get; set; } = default!;
+        public double? Order { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -669,16 +669,16 @@ namespace TodoApp.Generated
         /// <summary>
         /// List name with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 1)]
-        public string Name { get; set; } = default!;
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// List description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -720,9 +720,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// List description with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -750,17 +750,17 @@ namespace TodoApp.Generated
         /// </summary>
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
-        public string? Description { get; set; }
+        public string? Description { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("completed", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool? Completed { get; set; }
+        public bool? Completed { get; set; } = default!;
 
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
         [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double? Order { get; set; }
+        public double? Order { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -809,9 +809,9 @@ namespace TodoApp.Generated
         /// <summary>
         /// Task order with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(0D, 999999D)]
-        public double Order { get; set; } = default!;
+        public double? Order { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("createdAt", Required = Newtonsoft.Json.Required.Always)]
         public double CreatedAt { get; set; } = default!;
@@ -840,18 +840,18 @@ namespace TodoApp.Generated
         /// <summary>
         /// Username with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("username", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("username", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 3)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^[a-zA-Z0-9_-]+$")]
-        public string Username { get; set; } = default!;
+        public string? Username { get; set; } = default!;
 
         /// <summary>
         /// Email with validation constraints
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("email", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("email", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(254, MinimumLength = 5)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
-        public string Email { get; set; } = default!;
+        public string? Email { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 

@@ -50,13 +50,14 @@ export function TaskList({
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate task description
     if (!newTaskDescription.trim()) {
       if (newTaskDescription.length > 0) {
         // Has content but only whitespace
         handleApiCall(
-          () => Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
+          () =>
+            Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
           'create task'
         );
       }
@@ -108,7 +109,8 @@ export function TaskList({
       if (editingDescription.length > 0) {
         // Has content but only whitespace
         handleApiCall(
-          () => Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
+          () =>
+            Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
           'update task'
         );
       }

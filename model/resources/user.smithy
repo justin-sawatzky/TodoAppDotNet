@@ -1,5 +1,5 @@
 $version: "2"
-namespace example.todoapp.resources
+namespace jsawatzky.todoapp.resources
 
 /// Represents a user in the TODO application
 resource User {

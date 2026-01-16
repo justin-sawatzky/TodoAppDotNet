@@ -47,7 +47,7 @@ generate-backend-types: generate-openapi ## Generate C# DTOs for backend from Op
 		/generateClientClasses:false \
 		/generateClientInterfaces:false \
 		/generateDtoTypes:true \
-		/generateOptionalPropertiesAsNullable:false \
+		/generateOptionalPropertiesAsNullable:true \
 		/generateNullableReferenceTypes:true \
 		/jsonLibrary:NewtonsoftJson \
 		/dateTimeType:DateTimeOffset

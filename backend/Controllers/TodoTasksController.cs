@@ -68,8 +68,8 @@ public class TodoTasksController : ControllerBase
             ListId = listId,
             TaskId = Guid.NewGuid().ToString(),
             Description = request.Description,
-            Completed = request.Completed,
-            Order = (int)(request.Order == 0 ? (maxOrder + 1) : request.Order),
+            Completed = request.Completed ?? false,
+            Order = (int)(request.Order ?? (maxOrder + 1)),
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };

@@ -1,5 +1,5 @@
 $version: "2"
-namespace example.todoapp.resources
+namespace jsawatzky.todoapp.resources
 
 /// Represents a TODO list that belongs to a user
 resource TodoList {

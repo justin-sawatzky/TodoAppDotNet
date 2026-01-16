@@ -140,7 +140,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
 
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate list name
     if (!newListName.trim()) {
       if (newListName.length > 0) {

@@ -3,16 +3,16 @@ $version: "2"
 metadata suppressions = [
     {
         id: "MemberShouldReferenceResource",
-        namespace: "example.todoapp.resources"
+        namespace: "jsawatzky.todoapp.resources"
     }
 ]
 
-namespace example.todoapp
+namespace jsawatzky.todoapp
 
 use aws.protocols#restJson1
-use example.todoapp.resources#User
-use example.todoapp.resources#TodoList
-use example.todoapp.resources#TodoTask
+use jsawatzky.todoapp.resources#User
+use jsawatzky.todoapp.resources#TodoList
+use jsawatzky.todoapp.resources#TodoTask
 
 /// A TODO list application service that manages users, todo lists, and tasks.
 @restJson1
