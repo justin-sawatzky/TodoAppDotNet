@@ -17,6 +17,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
   const [selectedList, setSelectedList] = useState<TodoList | null>(null);
   const [tasks, setTasks] = useState<TodoTask[]>([]);
   const [newListName, setNewListName] = useState('');
+  const [newListDescription, setNewListDescription] = useState('');
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [editingListName, setEditingListName] = useState('');
   const [editingListDescription, setEditingListDescription] = useState('');
@@ -144,7 +145,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     setLoading(true);
 
     const { data, error: apiError } = await handleApiCall(
-      () => api.lists.create(user.userId, newListName),
+      () => api.lists.create(user.userId, newListName, newListDescription.trim() || undefined),
       'create list'
     );
 
@@ -156,6 +157,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     if (data) {
       await loadListsAfterUpdate();
       setNewListName('');
+      setNewListDescription('');
     }
 
     setLoading(false);
@@ -211,13 +213,29 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
     }
 
     setEditingListId(null);
-    await loadListsAfterUpdate();
 
-    // Update selected list if it's the one being edited
-    if (selectedList?.listId === listId) {
-      const updatedList = lists.find((l) => l.listId === listId);
-      if (updatedList) {
-        setSelectedList(updatedList);
+    // Reload lists and update selected list if needed
+    const { data, error: reloadError } = await handleApiCall(
+      () => api.lists.list(user.userId),
+      'load lists'
+    );
+
+    if (reloadError) {
+      handleUserInvalidation(reloadError);
+      return;
+    }
+
+    if (data?.lists) {
+      const updatedLists = data.lists as TodoList[];
+      setLists(updatedLists);
+
+      // Update selected list if it's the one being edited
+      // Force a new object reference to ensure React detects the change
+      if (selectedList?.listId === listId) {
+        const updatedList = updatedLists.find((l) => l.listId === listId);
+        if (updatedList) {
+          setSelectedList({ ...updatedList });
+        }
       }
     }
   };
@@ -267,8 +285,16 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
               placeholder="New list name..."
               disabled={loading}
             />
+            <textarea
+              value={newListDescription}
+              onChange={(e) => setNewListDescription(e.target.value)}
+              placeholder="Description (optional)..."
+              disabled={loading}
+              rows={2}
+              className="new-list-description"
+            />
             <button type="submit" disabled={loading}>
-              +
+              + Add List
             </button>
           </form>
 
@@ -296,6 +322,7 @@ export function TodoListView({ user, onLogout, onUserInvalidated }: TodoListView
         <main className="content-area">
           {selectedList ? (
             <TaskList
+              key={`${selectedList.listId}-${selectedList.updatedAt}`}
               user={user}
               list={selectedList}
               tasks={tasks}
