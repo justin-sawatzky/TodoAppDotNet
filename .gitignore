@@ -55,3 +55,14 @@ nunit-*.xml
 
 # Local tools
 tools/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+debug_snapshot.db
+
+# Smithy build
+build/
+
+.vscode

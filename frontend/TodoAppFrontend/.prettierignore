@@ -1,0 +1,14 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+
+# Generated files
+src/api/schema.ts
+
+# Misc
+.DS_Store
+*.log
+coverage

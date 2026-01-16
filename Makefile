@@ -1,6 +1,6 @@
 # TodoApp Docker Makefile
 
-.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all format format-frontend format-backend lint lint-frontend lint-backend
+.PHONY: help build run stop clean test smithy-build smithy-validate smithy-clean generate-openapi generate-frontend-types generate-backend-types generate-all format format-frontend format-backend lint lint-frontend lint-backend db-dump db-load
 
 help: ## Show this help message
 	@echo "TodoApp Docker Commands:"
@@ -138,3 +138,22 @@ dev-shell-backend: ## Access backend container shell
 
 dev-shell-frontend: ## Access frontend container shell
 	docker exec -it todoapp-frontend /bin/sh
+
+# Database commands
+db-dump: ## Save in-memory database to debug_snapshot.db and copy to local filesystem
+	@echo "Requesting database dump from backend..."
+	@curl -s -X POST http://localhost/api/debug/save-to-disk | jq '.' 2>/dev/null || curl -s -X POST http://localhost/api/debug/save-to-disk
+	@echo "Copying database file from container..."
+	@docker cp todoapp-backend:/app/debug_snapshot.db ./debug_snapshot.db
+	@echo "✅ Database dumped to ./debug_snapshot.db"
+
+db-load: ## Load database from local debug_snapshot.db file into in-memory database
+	@if [ ! -f ./debug_snapshot.db ]; then \
+		echo "❌ Error: debug_snapshot.db not found in current directory"; \
+		exit 1; \
+	fi
+	@echo "Copying database file to container..."
+	@docker cp ./debug_snapshot.db todoapp-backend:/app/debug_snapshot.db
+	@echo "Loading database into memory..."
+	@curl -s -X POST http://localhost/api/debug/load-from-disk | jq '.' 2>/dev/null || curl -s -X POST http://localhost/api/debug/load-from-disk
+	@echo "✅ Database loaded from ./debug_snapshot.db"

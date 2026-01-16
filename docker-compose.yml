@@ -9,7 +9,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - UseInMemoryDatabase=true
-      - DebugSaveToDisk=false
+      - DebugSaveToDisk=true
       - ASPNETCORE_URLS=http://+:5247
     networks:
       - todoapp-network
