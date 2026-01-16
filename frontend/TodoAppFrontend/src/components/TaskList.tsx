@@ -50,7 +50,18 @@ export function TaskList({
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskDescription.trim()) return;
+    
+    // Validate task description
+    if (!newTaskDescription.trim()) {
+      if (newTaskDescription.length > 0) {
+        // Has content but only whitespace
+        handleApiCall(
+          () => Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
+          'create task'
+        );
+      }
+      return;
+    }
 
     const { error: apiError } = await handleApiCall(
       () => api.tasks.create(user.userId, list.listId, newTaskDescription),
@@ -92,7 +103,17 @@ export function TaskList({
   };
 
   const handleSaveEdit = async (taskId: string) => {
-    if (!editingDescription.trim()) return;
+    // Validate task description
+    if (!editingDescription.trim()) {
+      if (editingDescription.length > 0) {
+        // Has content but only whitespace
+        handleApiCall(
+          () => Promise.reject({ message: 'Task description cannot be empty or contain only spaces' }),
+          'update task'
+        );
+      }
+      return;
+    }
 
     const { error: apiError } = await handleApiCall(
       () => api.tasks.update(user.userId, list.listId, taskId, editingDescription, undefined),
